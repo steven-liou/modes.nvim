@@ -83,7 +83,7 @@ function modes.set_colors()
     copy = config.colors.copy or util.get_bg_from_hl("ModesCopy", "#deb974"),
     delete = config.colors.delete or
       util.get_bg_from_hl("ModesDelete", "#F44747"),
-    replace = config.colors.copy or
+    replace = config.colors.replace or
       util.get_bg_from_hl("ModesReplace", "#D16969"),
     insert = config.colors.insert or
       util.get_bg_from_hl("ModesInsert", "#569CD6"),
@@ -266,7 +266,7 @@ function modes.setup(opts)
     end
 
     -- Replace mode
-    if current_mode == "r" then
+    if current_mode == "R" then
       if key == util.get_termcode("<esc>") then
         modes.reset()
       end
