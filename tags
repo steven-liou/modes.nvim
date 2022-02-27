@@ -1,0 +1,30 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/Volumes/D/Coding/Vim/modes.nvim/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	//
+Block_insert	lua/modes/init.lua	/^function Block_insert()$/;"	f
+Known issues	readme.md	/^## Known issues$/;"	s	chapter:modes.nvim
+Options	readme.md	/^## Options$/;"	s	chapter:modes.nvim
+Usage	readme.md	/^## Usage$/;"	s	chapter:modes.nvim
+Vertline_insert	lua/modes/init.lua	/^function Vertline_insert()$/;"	f
+blend	lua/modes/util.lua	/^function util.blend(fg, bg, alpha)$/;"	f	unknown:util
+blendChannel	lua/modes/util.lua	/^	local blendChannel = function(i)$/;"	f
+define_augroups	lua/modes/util.lua	/^function util.define_augroups(definitions)$/;"	f	unknown:util
+get_bg_from_hl	lua/modes/util.lua	/^function util.get_bg_from_hl(hl_name, fallback)$/;"	f	unknown:util
+get_byte	lua/modes/util.lua	/^local function get_byte(value, offset)$/;"	f
+get_color	lua/modes/util.lua	/^local function get_color(color)$/;"	f
+get_fg_from_hl	lua/modes/util.lua	/^function util.get_fg_from_hl(hl_name, fallback)$/;"	f	unknown:util
+get_termcode	lua/modes/util.lua	/^function util.get_termcode(key)$/;"	f	unknown:util
+hl	lua/modes/util.lua	/^function util.hl(group, color)$/;"	f	unknown:util
+modes.nvim	readme.md	/^# modes.nvim$/;"	c
+reset	lua/modes/init.lua	/^function modes.reset()$/;"	f	unknown:modes
+set_colors	lua/modes/init.lua	/^function modes.set_colors()$/;"	f	unknown:modes
+set_highlights	lua/modes/init.lua	/^function modes.set_highlights(style)$/;"	f	unknown:modes
+setup	lua/modes/init.lua	/^function modes.setup(opts)$/;"	f	unknown:modes
