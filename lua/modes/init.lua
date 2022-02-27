@@ -177,7 +177,8 @@ function modes.setup(opts)
   modes.set_colors()
   vim.defer_fn(function()
     modes.set_colors()
-  end, 15)
+    modes.set_highlights("normal")
+  end, 0)
 
   -- Set guicursor modes
   if config.set_cursor then
