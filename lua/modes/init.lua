@@ -184,7 +184,7 @@ function modes.setup(opts)
 
   -- Set guicursor modes
   if config.set_cursor then
-    vim.opt.guicursor:append("n:block-ModesNormal")
+    vim.opt.guicursor:append("a-n:block-ModesNormal")
     vim.opt.guicursor:append("v-sm:block-ModesVisual")
     vim.opt.guicursor:append("i-ci-ve:ver25-ModesInsert")
     vim.opt.guicursor:append("r-cr-o:block-ModesOperator")
@@ -231,12 +231,11 @@ function modes.setup(opts)
       end
 
       if key == "r" then
-        if operator_started then
+        modes.set_highlights("replace")
+        -- clear highlight after replace mode
+        vim.defer_fn(function()
           modes.reset()
-        else
-          modes.set_highlights("replace")
-          operator_started = true
-        end
+        end, 0)
       end
 
       if key == ":" then
