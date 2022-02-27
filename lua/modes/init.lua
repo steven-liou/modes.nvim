@@ -30,7 +30,7 @@ function modes.set_highlights(style)
     vim.cmd("hi CursorLine guibg=" .. dim_colors.copy)
     vim.cmd("hi CursorLineNr guifg=" .. colors.copy)
     vim.cmd("hi ModeMsg guifg=" .. colors.copy)
-    vim.cmd("hi ModesOperator guifg=NONE guibg=NONE")
+    vim.cmd("hi! ModesOperator guifg=NONE guibg=NONE")
     vim.cmd("hi! link ModesOperator ModesCopy")
   end
 
@@ -38,7 +38,7 @@ function modes.set_highlights(style)
     vim.cmd("hi CursorLine guibg=" .. dim_colors.delete)
     vim.cmd("hi CursorLineNr guifg=" .. colors.delete)
     vim.cmd("hi ModeMsg guifg=" .. colors.delete)
-    vim.cmd("hi ModesOperator guifg=NONE guibg=NONE")
+    vim.cmd("hi! ModesOperator guifg=NONE guibg=NONE")
     vim.cmd("hi! link ModesOperator ModesDelete")
   end
 
@@ -46,7 +46,7 @@ function modes.set_highlights(style)
     vim.cmd("hi CursorLine guibg=" .. dim_colors.replace)
     vim.cmd("hi CursorLineNr guifg=" .. colors.replace)
     vim.cmd("hi ModeMsg guifg=" .. colors.replace)
-    vim.cmd("hi ModesOperator guifg=NONE guibg=NONE")
+    vim.cmd("hi! ModesOperator guifg=NONE guibg=NONE")
     vim.cmd("hi! link ModesOperator ModesReplace")
   end
 
@@ -174,21 +174,19 @@ function modes.setup(opts)
   end
 
   -- Hack to ensure theme colors get loaded properly
-  modes.set_colors()
-  vim.defer_fn(function()
-    modes.set_colors()
-  end, 15)
-
-  -- Set common highlights
-  vim.cmd("hi Visual guibg=" .. dim_colors.visual)
+  -- modes.set_colors()
+  -- vim.defer_fn(function()
+  --   modes.set_colors()
+  -- end, 15)
 
   -- Set guicursor modes
   if config.set_cursor then
     vim.opt.guicursor:append("a-n:block-ModesNormal")
     vim.opt.guicursor:append("v-sm:block-ModesVisual")
     vim.opt.guicursor:append("i-ci-ve:ver25-ModesInsert")
-    vim.opt.guicursor:append("r-cr-o:block-ModesOperator")
     vim.opt.guicursor:append("c:block-ModesCommand")
+    vim.opt.guicursor:append("r-cr:block-ModesOperator")
+    vim.opt.guicursor:append("o:block-ModesReplace")
   end
 
   local on_key = vim.on_key or vim.register_keystroke_callback
@@ -204,7 +202,7 @@ function modes.setup(opts)
 
     -- Normal mode
     if current_mode == "n" then
-      if key == util.get_termcode("<esc>") then
+      if key == util.get_termcode("<esc>") or key == "u" or key == "" then
         modes.reset()
       end
 
@@ -230,12 +228,13 @@ function modes.setup(opts)
         modes.set_highlights("visual")
       end
 
-      if (key == "r" or key == "a" or key == "i") then
-        modes.set_highlights("replace")
-        -- clear highlight after replace mode
-        vim.defer_fn(function()
+      if (key == "r" or key == "c") then
+        if operator_started then
           modes.reset()
-        end, 0)
+        else
+          modes.set_highlights("replace")
+          operator_started = true
+        end
       end
 
       if key == ":" then
@@ -272,7 +271,7 @@ function modes.setup(opts)
     end
 
     -- operating pending mode
-    if current_mode == "o" then
+    if current_mode == "no" then
       modes.set_highlights("replace")
       if key == util.get_termcode("<esc>") then
         modes.reset()
