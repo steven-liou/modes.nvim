@@ -23,8 +23,6 @@ function modes.set_highlights(style)
     vim.cmd("hi CursorLine guibg=" .. dim_colors.normal)
     vim.cmd("hi CursorLineNr guifg=" .. colors.normal)
     vim.cmd("hi ModeMsg guifg=" .. colors.normal)
-    vim.cmd("hi ModesOperator guifg=NONE guibg=NONE")
-    vim.cmd("hi! link ModesOperator ModesNormal")
   end
 
   if style == "copy" then
@@ -44,6 +42,14 @@ function modes.set_highlights(style)
     vim.cmd("hi! link ModesOperator ModesDelete")
   end
 
+  if style == "replace" then
+    vim.cmd("hi CursorLine guibg=" .. dim_colors.replace)
+    vim.cmd("hi CursorLineNr guifg=" .. colors.replace)
+    vim.cmd("hi ModeMsg guifg=" .. colors.replace)
+    vim.cmd("hi ModesOperator guifg=NONE guibg=NONE")
+    vim.cmd("hi! link ModesOperator ModesReplace")
+  end
+
   if style == "insert" then
     vim.cmd("hi CursorLine guibg=" .. dim_colors.insert)
     vim.cmd("hi CursorLineNr guifg=" .. colors.insert)
@@ -61,6 +67,7 @@ function modes.set_highlights(style)
     vim.cmd("hi CursorLineNr guifg=" .. colors.command)
     vim.cmd("hi ModeMsg guifg=" .. colors.command)
   end
+
 end
 
 function modes.set_colors()
@@ -76,6 +83,8 @@ function modes.set_colors()
     copy = config.colors.copy or util.get_bg_from_hl("ModesCopy", "#deb974"),
     delete = config.colors.delete or
       util.get_bg_from_hl("ModesDelete", "#F44747"),
+    replace = config.colors.copy or
+      util.get_bg_from_hl("ModesReplace", "#D16969"),
     insert = config.colors.insert or
       util.get_bg_from_hl("ModesInsert", "#569CD6"),
     visual = config.colors.visual or
@@ -95,6 +104,8 @@ function modes.set_colors()
                         config.line_opacity.visual),
     command = util.blend(colors.command, init_colors.normal,
                          config.line_opacity.command),
+    replace = util.blend(colors.replace, init_colors.normal,
+                         config.line_opacity.replace),
   }
 
   vim.cmd("hi ModesNormal guibg=" .. colors.normal)
@@ -103,6 +114,7 @@ function modes.set_colors()
   vim.cmd("hi ModesInsert guibg=" .. colors.insert)
   vim.cmd("hi ModesVisual guibg=" .. colors.visual)
   vim.cmd("hi ModesCommand guibg=" .. colors.command)
+  vim.cmd("hi ModesReplace guibg=" .. colors.replace)
 end
 
 ---@class Colors
@@ -135,6 +147,7 @@ function modes.setup(opts)
       insert = 0.15,
       visual = 0.15,
       command = 0.15,
+      replace = 0.15,
     },
     set_cursor = true,
     focus_only = false,
@@ -156,6 +169,7 @@ function modes.setup(opts)
       insert = config.line_opacity,
       visual = config.line_opacity,
       command = config.line_opacity,
+      replace = config.line_opacity,
     }
   end
 
@@ -172,7 +186,7 @@ function modes.setup(opts)
   if config.set_cursor then
     vim.opt.guicursor:append("n:block-ModesNormal")
     vim.opt.guicursor:append("v-sm:block-ModesVisual")
-    vim.opt.guicursor:append("i:ver25-ModesInsert")
+    vim.opt.guicursor:append("i-ci-ve:ver25-ModesInsert")
     vim.opt.guicursor:append("r-cr-o:block-ModesOperator")
     vim.opt.guicursor:append("c:block-ModesCommand")
   end
@@ -216,6 +230,15 @@ function modes.setup(opts)
         modes.set_highlights("visual")
       end
 
+      if key == "r" then
+        if operator_started then
+          modes.reset()
+        else
+          modes.set_highlights("replace")
+          operator_started = true
+        end
+      end
+
       if key == ":" then
         modes.set_highlights("command")
       end
@@ -237,6 +260,13 @@ function modes.setup(opts)
 
     -- Command mode
     if current_mode == "c" then
+      if key == util.get_termcode("<esc>") then
+        modes.reset()
+      end
+    end
+
+    -- Replace mode
+    if current_mode == "r" then
       if key == util.get_termcode("<esc>") then
         modes.reset()
       end
@@ -269,9 +299,8 @@ function modes.setup(opts)
   util.define_augroups({_modes = autocmds})
 end
 
+-- Allow insert mode cursors to change shape when typing and waiting
 function Block_insert()
-  -- vim.opt.guicursor:remove("i:ver25-ModesInsert")
-  -- vim.opt.guicursor:append("i:block-ModesInsert")
   vim.cmd [[execute 'set guicursor-=i:ver10-ModesInsert']]
   vim.cmd [[execute 'set guicursor+=i:block-ModesInsert']]
 
@@ -280,18 +309,6 @@ end
 function Vertline_insert()
   vim.cmd [[execute 'set guicursor-=i:block-ModesInsert']]
   vim.cmd [[execute 'set guicursor+=i:ver10-ModesInsert']]
-
-  -- vim.opt.guicursor:remove("i:block-ModesInsert")
-  -- vim.opt.guicursor:append("i:ver25-ModesInsert")
 end
--- function! Block_insert(...) abort
---   execute 'set guicursor-=i:ver10-iCursor'
---   execute 'set guicursor+=i:block-iCursor'
--- endfunction
-
--- function! Vert_line_insert(...) abort
---   execute 'set guicursor-=i:block-iCursor'
---   execute 'set guicursor+=i:ver10-iCursor'
--- endfunction
 
 return modes
