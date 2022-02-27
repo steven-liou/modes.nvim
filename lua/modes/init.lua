@@ -174,10 +174,10 @@ function modes.setup(opts)
   end
 
   -- Hack to ensure theme colors get loaded properly
-  -- modes.set_colors()
-  -- vim.defer_fn(function()
-  --   modes.set_colors()
-  -- end, 15)
+  modes.set_colors()
+  vim.defer_fn(function()
+    modes.set_colors()
+  end, 15)
 
   -- Set guicursor modes
   if config.set_cursor then
