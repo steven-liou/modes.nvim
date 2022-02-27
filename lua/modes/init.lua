@@ -187,9 +187,8 @@ function modes.setup(opts)
     vim.opt.guicursor:append("a-n:block-ModesNormal")
     vim.opt.guicursor:append("v-sm:block-ModesVisual")
     vim.opt.guicursor:append("i-ci-ve:ver25-ModesInsert")
-    vim.opt.guicursor:append("r-cr:block-ModesOperator")
+    vim.opt.guicursor:append("r-cr-o:block-ModesOperator")
     vim.opt.guicursor:append("c:block-ModesCommand")
-    vim.opt.guicursor:append("o:block-ModesReplace")
   end
 
   local on_key = vim.on_key or vim.register_keystroke_callback
@@ -231,7 +230,7 @@ function modes.setup(opts)
         modes.set_highlights("visual")
       end
 
-      if key == "r" or key == "g" then
+      if (key == "r" or key == "a" or key == "i") then
         modes.set_highlights("replace")
         -- clear highlight after replace mode
         vim.defer_fn(function()
@@ -274,6 +273,7 @@ function modes.setup(opts)
 
     -- operating pending mode
     if current_mode == "o" then
+      modes.set_highlights("replace")
       if key == util.get_termcode("<esc>") then
         modes.reset()
       end
