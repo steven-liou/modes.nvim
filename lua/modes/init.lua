@@ -187,8 +187,9 @@ function modes.setup(opts)
     vim.opt.guicursor:append("a-n:block-ModesNormal")
     vim.opt.guicursor:append("v-sm:block-ModesVisual")
     vim.opt.guicursor:append("i-ci-ve:ver25-ModesInsert")
-    vim.opt.guicursor:append("r-cr-o:block-ModesOperator")
+    vim.opt.guicursor:append("r-cr:block-ModesOperator")
     vim.opt.guicursor:append("c:block-ModesCommand")
+    vim.opt.guicursor:append("o:block-ModesReplace")
   end
 
   local on_key = vim.on_key or vim.register_keystroke_callback
