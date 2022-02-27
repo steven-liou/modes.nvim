@@ -231,7 +231,7 @@ function modes.setup(opts)
         modes.set_highlights("visual")
       end
 
-      if key == "r" then
+      if key == "r" or key == "g" then
         modes.set_highlights("replace")
         -- clear highlight after replace mode
         vim.defer_fn(function()
@@ -267,6 +267,13 @@ function modes.setup(opts)
 
     -- Replace mode
     if current_mode == "R" then
+      if key == util.get_termcode("<esc>") then
+        modes.reset()
+      end
+    end
+
+    -- operating pending mode
+    if current_mode == "o" then
       if key == util.get_termcode("<esc>") then
         modes.reset()
       end
