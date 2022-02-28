@@ -219,7 +219,8 @@ function modes.setup(opts)
 
     -- Normal mode
     if current_mode == "n" then
-      if key == util.get_termcode("<esc>") or key == "u" or key == "" then
+      if key == util.get_termcode("<esc>") or key == "u" or key == "" or
+        vim.v.operator == "g@" then
         modes.reset()
       end
 
@@ -265,9 +266,6 @@ function modes.setup(opts)
         else
           modes.set_highlights("pending")
           operator_started = true
-          vim.defer_fn(function()
-            modes.reset()
-          end, 0)
         end
       end
     end
