@@ -219,8 +219,7 @@ function modes.setup(opts)
 
     -- Normal mode
     if current_mode == "n" then
-      if key == util.get_termcode("<esc>") or key == "u" or key == "" or
-        vim.v.operator == "g@" then
+      if key == util.get_termcode("<esc>") or vim.v.operator == "g@" then
         modes.reset()
       end
 
@@ -252,6 +251,12 @@ function modes.setup(opts)
         else
           modes.set_highlights("replace")
           operator_started = true
+          -- fix highlight only in normal mode (this accounts for s, S, and cc actions)
+          vim.defer_fn(function()
+            if vim.fn.mode() == "n" then
+              modes.reset()
+            end
+          end, 0)
         end
       end
 
@@ -268,6 +273,15 @@ function modes.setup(opts)
           operator_started = true
         end
       end
+
+      -- for some reason undo and redo show weird highlighting
+      if key == "u" or key == "" then
+        modes.set_highlights("copy")
+        vim.defer_fn(function()
+          modes.reset()
+        end, 200)
+      end
+
     end
 
     -- Visual mode
