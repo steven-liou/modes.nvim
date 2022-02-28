@@ -68,6 +68,14 @@ function modes.set_highlights(style)
     vim.cmd("hi ModeMsg guifg=" .. colors.command)
   end
 
+  if style == "pending" then
+    vim.cmd("hi CursorLine guibg=" .. dim_colors.pending)
+    vim.cmd("hi CursorLineNr guifg=" .. colors.pending)
+    vim.cmd("hi ModeMsg guifg=" .. colors.pending)
+    vim.cmd("hi! ModesOperator guifg=NONE guibg=NONE")
+    vim.cmd("hi! link ModesOperator ModesPending")
+  end
+
 end
 
 function modes.set_colors()
@@ -91,6 +99,8 @@ function modes.set_colors()
       util.get_bg_from_hl("ModesVisual", "#C586C0"),
     command = config.colors.copy or
       util.get_bg_from_hl("ModesCommand", "#deb974"),
+    pending = config.colors.pending or
+      util.get_bg_from_hl("ModesPending", "#4ec9b0"),
   }
   dim_colors = {
     normal = util.blend(colors.normal, init_colors.normal,
@@ -106,6 +116,8 @@ function modes.set_colors()
                          config.line_opacity.command),
     replace = util.blend(colors.replace, init_colors.normal,
                          config.line_opacity.replace),
+    pending = util.blend(colors.pending, init_colors.normal,
+                         config.line_opacity.pending),
   }
 
   vim.cmd("hi ModesNormal guibg=" .. colors.normal)
@@ -115,6 +127,7 @@ function modes.set_colors()
   vim.cmd("hi ModesVisual guibg=" .. colors.visual)
   vim.cmd("hi ModesCommand guibg=" .. colors.command)
   vim.cmd("hi ModesReplace guibg=" .. colors.replace)
+  vim.cmd("hi ModesPending guibg=" .. colors.pending)
 end
 
 ---@class Colors
@@ -148,6 +161,7 @@ function modes.setup(opts)
       visual = 0.15,
       command = 0.15,
       replace = 0.15,
+      pending = 0.15,
     },
     set_cursor = true,
     focus_only = false,
@@ -170,6 +184,7 @@ function modes.setup(opts)
       visual = config.line_opacity,
       command = config.line_opacity,
       replace = config.line_opacity,
+      pending = config.line_opacity,
     }
   end
 
@@ -186,13 +201,14 @@ function modes.setup(opts)
     vim.opt.guicursor:append("v-sm:block-ModesVisual")
     vim.opt.guicursor:append("i-ci-ve:ver25-ModesInsert")
     vim.opt.guicursor:append("c:block-ModesCommand")
-    vim.opt.guicursor:append("r-cr:block-ModesOperator")
-    vim.opt.guicursor:append("o:block-ModesReplace")
+    vim.opt.guicursor:append("r-cr-o:block-ModesOperator")
+    -- vim.opt.guicursor:append("o:block-ModesReplace")
   end
 
   local on_key = vim.on_key or vim.register_keystroke_callback
   on_key(function(key)
     local current_mode = vim.fn.mode()
+    -- print("key " .. key .. " operator " .. vim.v.operator)
 
     -- Insert mode
     if current_mode == "i" then
@@ -241,6 +257,19 @@ function modes.setup(opts)
       if key == ":" then
         modes.set_highlights("command")
       end
+
+      -- operating pending mode
+      if key == "@" then
+        if operator_started then
+          modes.reset()
+        else
+          modes.set_highlights("pending")
+          operator_started = true
+          vim.defer_fn(function()
+            modes.reset()
+          end, 0)
+        end
+      end
     end
 
     -- Visual mode
@@ -266,14 +295,6 @@ function modes.setup(opts)
 
     -- Replace mode
     if current_mode == "R" then
-      if key == util.get_termcode("<esc>") then
-        modes.reset()
-      end
-    end
-
-    -- operating pending mode
-    if current_mode == "no" then
-      modes.set_highlights("replace")
       if key == util.get_termcode("<esc>") then
         modes.reset()
       end
