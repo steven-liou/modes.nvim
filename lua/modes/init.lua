@@ -195,6 +195,9 @@ function modes.setup(opts)
     modes.set_highlights("normal")
   end, 0)
 
+  -- Set common highlights
+  vim.cmd("hi Visual guibg=" .. dim_colors.visual)
+
   -- Set guicursor modes
   if config.set_cursor then
     vim.opt.guicursor:append("a-n:block-ModesNormal")
@@ -241,8 +244,9 @@ function modes.setup(opts)
         end
       end
 
-      if (key == "v" or key == "V") and not operator_started then
-        modes.set_highlights("visual")
+      -- for some reason some plugins will use these keys to select regions
+      if (key == "v" or key == "V") then
+        modes.set_highlights("normal")
       end
 
       if (key == "r" or key == "c") then
