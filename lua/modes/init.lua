@@ -222,7 +222,9 @@ function modes.setup(opts)
 
     -- Normal mode
     if current_mode == "n" then
-      if key == util.get_termcode("<esc>") or vim.v.operator == "g@" then
+      -- for some reason some plugins will use v and V to select regions
+      if key == util.get_termcode("<esc>") or vim.v.operator == "g@" or key ==
+        "v" or key == "V" then
         modes.reset()
       end
 
@@ -242,11 +244,6 @@ function modes.setup(opts)
           modes.set_highlights("delete")
           operator_started = true
         end
-      end
-
-      -- for some reason some plugins will use these keys to select regions
-      if (key == "v" or key == "V") then
-        modes.set_highlights("normal")
       end
 
       if (key == "r" or key == "c") then
