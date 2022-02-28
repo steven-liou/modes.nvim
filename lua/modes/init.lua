@@ -92,7 +92,7 @@ function modes.set_colors()
     delete = config.colors.delete or
       util.get_bg_from_hl("ModesDelete", "#F44747"),
     replace = config.colors.replace or
-      util.get_bg_from_hl("ModesReplace", "#D16969"),
+      util.get_bg_from_hl("ModesReplace", "#e3a5a5"),
     insert = config.colors.insert or
       util.get_bg_from_hl("ModesInsert", "#569CD6"),
     visual = config.colors.visual or
@@ -120,14 +120,14 @@ function modes.set_colors()
                          config.line_opacity.pending),
   }
 
-  vim.cmd("hi ModesNormal guibg=" .. colors.normal)
-  vim.cmd("hi ModesCopy guibg=" .. colors.copy)
-  vim.cmd("hi ModesDelete guibg=" .. colors.delete)
-  vim.cmd("hi ModesInsert guibg=" .. colors.insert)
-  vim.cmd("hi ModesVisual guibg=" .. colors.visual)
-  vim.cmd("hi ModesCommand guibg=" .. colors.command)
-  vim.cmd("hi ModesReplace guibg=" .. colors.replace)
-  vim.cmd("hi ModesPending guibg=" .. colors.pending)
+  vim.cmd("hi ModesNormal gui=bold guifg=#262626 guibg=" .. colors.normal)
+  vim.cmd("hi ModesCopy gui=bold guifg=#262626 guibg=" .. colors.copy)
+  vim.cmd("hi ModesDelete gui=bold guifg=#262626 guibg=" .. colors.delete)
+  vim.cmd("hi ModesInsert gui=bold guifg=#262626 guibg=" .. colors.insert)
+  vim.cmd("hi ModesVisual gui=bold guifg=#262626 guibg=" .. colors.visual)
+  vim.cmd("hi ModesCommand gui=bold guifg=#262626 guibg=" .. colors.command)
+  vim.cmd("hi ModesReplace gui=bold guifg=#262626 guibg=" .. colors.replace)
+  vim.cmd("hi ModesPending gui=bold guifg=#262626 guibg=" .. colors.pending)
 end
 
 ---@class Colors
