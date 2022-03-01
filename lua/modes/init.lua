@@ -40,6 +40,8 @@ function modes.set_highlights(style)
     vim.cmd("hi ModeMsg guifg=" .. colors.delete)
     vim.cmd("hi! ModesOperator guifg=NONE guibg=NONE")
     vim.cmd("hi! link ModesOperator ModesDelete")
+    vim.cmd("hi! ModesOperatorText guifg=NONE guibg=NONE")
+    vim.cmd("hi! link ModesOperatorText ModesDeleteText")
   end
 
   if style == "replace" then
@@ -48,6 +50,8 @@ function modes.set_highlights(style)
     vim.cmd("hi ModeMsg guifg=" .. colors.replace)
     vim.cmd("hi! ModesOperator guifg=NONE guibg=NONE")
     vim.cmd("hi! link ModesOperator ModesReplace")
+    vim.cmd("hi! ModesOperatorText guifg=NONE guibg=NONE")
+    vim.cmd("hi! link ModesOperatorText ModesReplaceText")
   end
 
   if style == "insert" then
@@ -74,6 +78,8 @@ function modes.set_highlights(style)
     vim.cmd("hi ModeMsg guifg=" .. colors.pending)
     vim.cmd("hi! ModesOperator guifg=NONE guibg=NONE")
     vim.cmd("hi! link ModesOperator ModesPending")
+    vim.cmd("hi! ModesOperatorText guifg=NONE guibg=NONE")
+    vim.cmd("hi! link ModesOperatorText ModesPendingText")
   end
 
 end
