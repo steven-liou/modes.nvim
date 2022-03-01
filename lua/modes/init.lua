@@ -128,6 +128,16 @@ function modes.set_colors()
   vim.cmd("hi ModesCommand gui=bold guifg=#262626 guibg=" .. colors.command)
   vim.cmd("hi ModesReplace gui=bold guifg=#262626 guibg=" .. colors.replace)
   vim.cmd("hi ModesPending gui=bold guifg=#262626 guibg=" .. colors.pending)
+
+  vim.cmd("hi ModesNormalText gui=bold guibg=#262626 guifg=" .. colors.normal)
+  vim.cmd("hi ModesCopyText gui=bold guibg=#262626 guifg=" .. colors.copy)
+  vim.cmd("hi ModesDeleteText gui=bold guibg=#262626 guifg=" .. colors.delete)
+  vim.cmd("hi ModesInsertText gui=bold guibg=#262626 guifg=" .. colors.insert)
+  vim.cmd("hi ModesVisualText gui=bold guibg=#262626 guifg=" .. colors.visual)
+  vim.cmd("hi ModesCommandText gui=bold guibg=#262626 guifg=" .. colors.command)
+  vim.cmd("hi ModesReplaceText gui=bold guibg=#262626 guifg=" .. colors.replace)
+  vim.cmd("hi ModesPendingText gui=bold guibg=#262626 guifg=" .. colors.pending)
+
 end
 
 ---@class Colors
@@ -211,7 +221,8 @@ function modes.setup(opts)
   local on_key = vim.on_key or vim.register_keystroke_callback
   on_key(function(key)
     local current_mode = vim.fn.mode()
-    -- print("key " .. key .. " operator " .. vim.v.operator)
+    -- print("key " .. key .. " operator " .. vim.v.operator .. " mode " ..
+    --        current_mode)
 
     -- Insert mode
     if current_mode == "i" then
@@ -287,9 +298,10 @@ function modes.setup(opts)
 
     -- Visual mode
     if current_mode == "v" then
-      if key == util.get_termcode("<esc>") then
+      if key == util.get_termcode("<esc>") or key == "o" then
         modes.reset()
       end
+
     end
 
     -- Visual line mode
