@@ -245,37 +245,25 @@ function modes.setup(opts)
         modes.reset()
       end
 
-      if key == "y" then
-        if operator_started then
-          modes.reset()
-        else
-          modes.set_highlights("copy")
-          operator_started = true
-        end
+      if key == "y" and not operator_started then
+        modes.set_highlights("copy")
+        operator_started = true
       end
 
-      if key == "d" then
-        if operator_started then
-          modes.reset()
-        else
-          modes.set_highlights("delete")
-          operator_started = true
-        end
+      if key == "d" and not operator_started then
+        modes.set_highlights("delete")
+        operator_started = true
       end
 
-      if (key == "r" or key == "c") then
-        if operator_started then
-          modes.reset()
-        else
-          modes.set_highlights("replace")
-          operator_started = true
-          -- fix highlight only in normal mode (this accounts for s, S, and cc actions)
-          vim.defer_fn(function()
-            if vim.fn.mode() == "n" then
-              modes.reset()
-            end
-          end, 0)
-        end
+      if (key == "r" or key == "c") and not operator_started then
+        modes.set_highlights("replace")
+        operator_started = true
+        -- fix highlight only in normal mode (this accounts for s, S, and cc actions)
+        vim.defer_fn(function()
+          if vim.fn.mode() == "n" then
+            modes.reset()
+          end
+        end, 0)
       end
 
       if key == ":" then
@@ -283,13 +271,9 @@ function modes.setup(opts)
       end
 
       -- operating pending mode
-      if key == "@" then
-        if operator_started then
-          modes.reset()
-        else
-          modes.set_highlights("pending")
-          operator_started = true
-        end
+      if key == "@" and not operator_started then
+        modes.set_highlights("pending")
+        operator_started = true
       end
 
       -- for some reason undo and redo show weird highlighting
