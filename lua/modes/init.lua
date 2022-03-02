@@ -240,8 +240,8 @@ function modes.setup(opts)
     -- Normal mode
     if current_mode == "n" then
       -- for some reason some plugins will use v and V to select regions
-      if key == util.get_termcode("<esc>") or vim.v.operator == "g@" or key ==
-        "v" or key == "V" then
+      if operator_started or key == util.get_termcode("<esc>") or vim.v.operator ==
+        "g@" or key == "v" or key == "V" then
         modes.reset()
       end
 
