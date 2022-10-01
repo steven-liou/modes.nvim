@@ -80,8 +80,8 @@ function modes.set_highlights(style)
 		vim.cmd('hi CursorLine guibg=' .. dim_colors.pending)
 		set_current_line_highlight(colors.pending, dim_colors.pending)
 		vim.cmd('hi ModeMsg guifg=' .. colors.pending)
-		-- vim.cmd('hi! ModesOperator guifg=NONE guibg=NONE')
-		-- vim.cmd('hi! link ModesOperator ModesPending')
+		vim.cmd('hi! ModesOperator guifg=NONE guibg=NONE')
+		vim.cmd('hi! link ModesOperator ModesPending')
 	end
 end
 
