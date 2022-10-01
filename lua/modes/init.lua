@@ -297,11 +297,6 @@ function modes.setup(opts)
 		command = 'set nocursorline',
 		desc = 'Disable cursorline when leaving neovim',
 	})
-	vim.api.nvim_create_autocmd('ModeChanged', {
-		pattern = '*:n',
-		callback = modes.reset,
-		desc = 'Highlight yanked text',
-	})
 
 	vim.api.nvim_create_autocmd('ModeChanged', {
 		pattern = '*:i',
@@ -328,7 +323,7 @@ function modes.setup(opts)
 	})
 
 	vim.api.nvim_create_autocmd('ModeChanged', {
-		pattern = 'n:no',
+		pattern = 'n:no,no:n',
 		callback = function()
 			modes.set_highlights('pending')
 		end,
