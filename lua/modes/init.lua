@@ -323,7 +323,7 @@ function modes.setup(opts)
 	})
 
 	vim.api.nvim_create_autocmd('ModeChanged', {
-		pattern = 'n:no,no:n',
+		pattern = 'n:no',
 		callback = function()
 			modes.set_highlights('pending')
 		end,
