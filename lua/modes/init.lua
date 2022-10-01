@@ -264,12 +264,6 @@ function modes.setup(opts)
 				end, 0)
 			end
 
-			-- operating pending mode
-			if key == '@' and not operator_started then
-				modes.set_highlights('pending')
-				operator_started = true
-			end
-
 		end
 	end)
 
