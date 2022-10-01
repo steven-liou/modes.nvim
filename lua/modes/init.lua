@@ -146,9 +146,6 @@ function modes.set_colors()
 	vim.cmd('hi ModesInsertText gui=bold guibg=#262626 guifg=' .. colors.insert)
 	vim.cmd('hi ModesVisualText gui=bold guibg=#262626 guifg=' .. colors.visual)
 	vim.cmd(
-		'hi ModesCommandText gui=bold guibg=#262626 guifg=' .. colors.command
-	)
-	vim.cmd(
 		'hi ModesReplaceText gui=bold guibg=#262626 guifg=' .. colors.replace
 	)
 	vim.cmd(
