@@ -299,7 +299,7 @@ function modes.setup(opts)
 	})
 
 	vim.api.nvim_create_autocmd('ModeChanged', {
-		pattern = '*:n',
+		pattern = 'v:n,i:n,r:n',
 		callback = function()
 			modes.set_highlights('normal')
 		end,
