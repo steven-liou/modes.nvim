@@ -47,26 +47,7 @@ function modes.set_highlights(style)
 		vim.cmd('hi ModeMsg guifg=' .. colors.normal)
 	end
 
-	if style == 'copy' then
-		-- vim.cmd("hi CopyLine guibg=" .. dim_colors.copy)
-
-		vim.cmd('hi CursorLine guibg=' .. dim_colors.copy)
-		set_current_line_highlight(colors.copy, dim_colors.copy)
-		vim.cmd('hi ModeMsg guifg=' .. colors.copy)
-		vim.cmd('hi! ModesOperator guifg=NONE guibg=NONE')
-		vim.cmd('hi! link ModesOperator ModesCopy')
-	end
-
-	if style == 'delete' then
-		vim.cmd('hi CursorLine guibg=' .. dim_colors.delete)
-		set_current_line_highlight(colors.delete, dim_colors.delete)
-		vim.cmd('hi ModeMsg guifg=' .. colors.delete)
-		vim.cmd('hi! ModesOperator guifg=NONE guibg=NONE')
-		vim.cmd('hi! link ModesOperator ModesDelete')
-		vim.cmd('hi! ModesOperatorText guifg=NONE guibg=NONE')
-		vim.cmd('hi! link ModesOperatorText ModesDeleteText')
-	end
-
+	
 	if style == 'replace' then
 		vim.cmd('hi CursorLine guibg=' .. dim_colors.replace)
 		set_current_line_highlight(colors.replace, dim_colors.replace)
@@ -115,10 +96,6 @@ function modes.set_colors()
 	colors = {
 		normal = config.colors.normal
 			or util.get_bg_from_hl('ModesNormal', '#608B4E'),
-		copy = config.colors.copy
-			or util.get_bg_from_hl('ModesCopy', '#deb974'),
-		delete = config.colors.delete
-			or util.get_bg_from_hl('ModesDelete', '#F44747'),
 		replace = config.colors.replace
 			or util.get_bg_from_hl('ModesReplace', '#e3a5a5'),
 		insert = config.colors.insert
@@ -135,16 +112,6 @@ function modes.set_colors()
 			colors.normal,
 			init_colors.normal,
 			config.line_opacity.normal
-		),
-		copy = util.blend(
-			colors.copy,
-			init_colors.normal,
-			config.line_opacity.copy
-		),
-		delete = util.blend(
-			colors.delete,
-			init_colors.normal,
-			config.line_opacity.delete
 		),
 		insert = util.blend(
 			colors.insert,
@@ -174,8 +141,6 @@ function modes.set_colors()
 	}
 
 	vim.cmd('hi ModesNormal gui=bold guifg=#262626 guibg=' .. colors.normal)
-	vim.cmd('hi ModesCopy gui=bold guifg=#262626 guibg=' .. colors.copy)
-	vim.cmd('hi ModesDelete gui=bold guifg=#262626 guibg=' .. colors.delete)
 	vim.cmd('hi ModesInsert gui=bold guifg=#262626 guibg=' .. colors.insert)
 	vim.cmd('hi ModesVisual gui=bold guifg=#262626 guibg=' .. colors.visual)
 	vim.cmd('hi ModesCommand gui=bold guifg=#262626 guibg=' .. colors.command)
@@ -183,8 +148,6 @@ function modes.set_colors()
 	vim.cmd('hi ModesPending gui=bold guifg=#262626 guibg=' .. colors.pending)
 
 	vim.cmd('hi ModesNormalText gui=bold guibg=#262626 guifg=' .. colors.normal)
-	vim.cmd('hi ModesCopyText gui=bold guibg=#262626 guifg=' .. colors.copy)
-	vim.cmd('hi ModesDeleteText gui=bold guibg=#262626 guifg=' .. colors.delete)
 	vim.cmd('hi ModesInsertText gui=bold guibg=#262626 guifg=' .. colors.insert)
 	vim.cmd('hi ModesVisualText gui=bold guibg=#262626 guifg=' .. colors.visual)
 	vim.cmd(
@@ -223,8 +186,6 @@ function modes.setup(opts)
 		colors = {},
 		line_opacity = {
 			normal = 0.15,
-			copy = 0.15,
-			delete = 0.15,
 			insert = 0.15,
 			visual = 0.15,
 			command = 0.15,
@@ -246,8 +207,6 @@ function modes.setup(opts)
 	if type(config.line_opacity) == 'number' then
 		config.line_opacity = {
 			normal = config.line_opacity,
-			copy = config.line_opacity,
-			delete = config.line_opacity,
 			insert = config.line_opacity,
 			visual = config.line_opacity,
 			command = config.line_opacity,
@@ -302,18 +261,6 @@ function modes.setup(opts)
 				modes.reset()
 			end
 
-			if key == 'y' and not operator_started then
-				modes.set_highlights('copy')
-				operator_started = true
-				style = 'copy'
-			end
-
-			if key == 'd' and not operator_started then
-				-- modes.set_highlights("delete")
-				-- operator_started = true
-				style = 'delete'
-			end
-
 			if (key == 'r' or key == 'c') and not operator_started then
 				modes.set_highlights('replace')
 				operator_started = true
@@ -331,14 +278,6 @@ function modes.setup(opts)
 				operator_started = true
 			end
 
-			-- for some reason undo and redo show weird highlighting
-			if key == 'u' or key == '' then
-				style = 'copy'
-				-- modes.set_highlights("copy")
-				-- vim.defer_fn(function()
-				--   modes.reset()
-				-- end, 200)
-			end
 		end
 	end)
 
