@@ -299,6 +299,14 @@ function modes.setup(opts)
 	})
 
 	vim.api.nvim_create_autocmd('ModeChanged', {
+		pattern = '*:n',
+		callback = function()
+			modes.set_highlights('normal')
+		end,
+		desc = 'Reset to normal mode',
+	})
+
+	vim.api.nvim_create_autocmd('ModeChanged', {
 		pattern = '*:i',
 		callback = function()
 			modes.set_highlights('insert')
@@ -328,6 +336,14 @@ function modes.setup(opts)
 			modes.set_highlights('pending')
 		end,
 		desc = 'Change cursor color when entering pending mode',
+	})
+	
+	vim.api.nvim_create_autocmd('ModeChanged', {
+		pattern = '*:r',
+		callback = function()
+			modes.set_highlights('replace')
+		end,
+		desc = 'Change cursor color when entering replace mode',
 	})
 
 	vim.api.nvim_create_autocmd('TextChanged', {
