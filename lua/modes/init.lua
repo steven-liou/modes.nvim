@@ -230,15 +230,6 @@ function modes.setup(opts)
 	local on_key = vim.on_key or vim.register_keystroke_callback
 	on_key(function(key)
 		local current_mode = vim.fn.mode()
-		-- print("key " .. key .. " operator " .. vim.v.operator .. " mode " ..
-		--        current_mode)
-
-		-- Insert mode
-		-- if current_mode == "i" then
-		--   if key == util.get_termcode("<esc>") then
-		--     modes.reset()
-		--   end
-		-- end
 
 		-- Normal mode
 		if current_mode == 'n' then
@@ -262,6 +253,10 @@ function modes.setup(opts)
 						modes.reset()
 					end
 				end, 0)
+			end
+				
+			if (key == 'y') and not operater_started then
+				operator_started = true
 			end
 
 		end
