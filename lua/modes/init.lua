@@ -1,21 +1,264 @@
-local util = require('modes.util')
+local utils = require('modes.utils')
+local reset_delay = 500
+local reset_timer = nil
 
-local modes = {}
+local M = {}
 local config = {}
+local default_config = {
+	colors = {},
+	line_opacity = {
+		normal = 0.15,
+		copy = 0.15,
+		delete = 0.15,
+		insert = 0.15,
+		visual = 0.15,
+		operator = 0.15,
+		command = 0.15,
+		replace = 0.15,
+	},
+	set_cursor = true,
+	set_cursorline = true,
+	set_number = true,
+	ignore_filetypes = { 'NvimTree', 'TelescopePrompt' },
+}
+local winhighlight = {
+	normal = {
+		CursorLine = 'ModesNormalCursorLine',
+		CursorLineNr = 'ModesNormalCursorLineNr',
+		CursorLineSign = 'ModesNormalCursorLineSign',
+		CursorLineFold = 'ModesNormalCursorLineFold',
+	},
+	copy = {
+		CursorLine = 'ModesCopyCursorLine',
+		CursorLineNr = 'ModesCopyCursorLineNr',
+		CursorLineSign = 'ModesCopyCursorLineSign',
+		CursorLineFold = 'ModesCopyCursorLineFold',
+	},
+	insert = {
+		CursorLine = 'ModesInsertCursorLine',
+		CursorLineNr = 'ModesInsertCursorLineNr',
+		CursorLineSign = 'ModesInsertCursorLineSign',
+		CursorLineFold = 'ModesInsertCursorLineFold',
+	},
+	delete = {
+		CursorLine = 'ModesDeleteCursorLine',
+		CursorLineNr = 'ModesDeleteCursorLineNr',
+		CursorLineSign = 'ModesDeleteCursorLineSign',
+		CursorLineFold = 'ModesDeleteCursorLineFold',
+	},
+	visual = {
+		CursorLine = 'ModesVisualCursorLine',
+		CursorLineNr = 'ModesVisualCursorLineNr',
+		CursorLineSign = 'ModesVisualCursorLineSign',
+		CursorLineFold = 'ModesVisualCursorLineFold',
+		Visual = 'ModesVisualVisual',
+	},
+	command = {
+		CursorLine = 'ModesCommandCursorLine',
+		CursorLineNr = 'ModesCommandCursorLineNr',
+		CursorLineSign = 'ModesCommandCursorLineSign',
+		CursorLineFold = 'ModesCommandCursorLineFold',
+	},
+	replace = {
+		CursorLine = 'ModesReplaceCursorLine',
+		CursorLineNr = 'ModesReplaceCursorLineNr',
+		CursorLineSign = 'ModesReplaceCursorLineSign',
+		CursorLineFold = 'ModesReplaceCursorLineFold',
+	},
+	pending = {
+		CursorLine = 'ModesPendingCursorLine',
+		CursorLineNr = 'ModesPendingCursorLineNr',
+		CursorLineSign = 'ModesPendingCursorLineSign',
+		CursorLineFold = 'ModesPendingCursorLineFold',
+	},
+	history = {
+		CursorLine = 'ModesHistoryCursorLine',
+		CursorLineNr = 'ModesHistoryCursorLineNr',
+		CursorLineSign = 'ModesHistoryCursorLineSign',
+		CursorLineFold = 'ModesHistoryCursorLineFold',
+	},
+}
 local colors = {}
-local dim_colors = {}
-local init_colors = {}
+local blended_colors = {}
 local operator_started = false
-local timer = nil
-local style = 'normal'
-local block_cursor_timer
+local in_ignored_buffer = function()
+	return vim.tbl_contains(config.ignore_filetypes, vim.bo.filetype)
+end
 
-function modes.reset()
-	modes.set_highlights('normal')
+M.reset = function()
+	M.highlight('normal')
+	reset_timer = nil
 	operator_started = false
 end
 
-function modes.block_insert()
+---Update highlights
+---@param scene 'normal'|'insert'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'pending' | 'history'
+M.highlight = function(scene)
+	if in_ignored_buffer() then
+		return
+	end
+
+	local winhl_map = {}
+	local prev_value = vim.api.nvim_win_get_option(0, 'winhighlight')
+
+	-- mapping the old value of 'winhighlight'
+	if prev_value ~= '' then
+		for _, winhl in ipairs(vim.split(prev_value, ',')) do
+			local pair = vim.split(winhl, ':')
+			winhl_map[pair[1]] = pair[2]
+		end
+	end
+
+	-- overrides 'builtin':'hl' if the current scene has a mapping for it
+	for builtin, hl in pairs(winhighlight[scene]) do
+		winhl_map[builtin] = hl
+	end
+
+	local new_value = {}
+	for builtin, hl in pairs(winhl_map) do
+		table.insert(new_value, ('%s:%s'):format(builtin, hl))
+	end
+	vim.api.nvim_win_set_option(0, 'winhighlight', table.concat(new_value, ','))
+
+	if vim.api.nvim_get_option('showmode') then
+		if scene == 'visual' then
+			utils.set_hl('ModeMsg', { link = 'ModesVisualModeMsg' })
+		elseif scene == 'insert' then
+			utils.set_hl('ModeMsg', { link = 'ModesInsertModeMsg' })
+		end
+	end
+
+	if config.set_cursor then
+		if scene == 'normal' then
+			utils.set_hl('ModesNormalCursor', { link = 'ModesNormal' })
+		elseif scene == 'delete' then
+			utils.set_hl('ModesNormalCursor', { link = 'ModesDelete' })
+			utils.set_hl('ModesOperatorCursor', { link = 'ModesDelete' })
+		elseif scene == 'insert' then
+			utils.set_hl('ModesOperatorCursor', { link = 'ModesInsert' })
+		elseif scene == 'copy' then
+			utils.set_hl('ModesNormalCursor', { link = 'ModesCopy' })
+			utils.set_hl('ModesOperatorCursor', { link = 'ModesCopy' })
+		elseif scene == 'pending' then
+			utils.set_hl('ModesOperatorCursor', { link = 'ModesPending' })
+			utils.set_hl('ModesNormalCursor', { link = 'ModesPending' })
+		elseif scene == 'history' then
+			utils.set_hl('ModesNormalCursor', { link = 'ModesHistory' })
+		end
+	end
+end
+
+M.define = function()
+	local normal_bg = utils.get_bg('Normal', 'Normal')
+	colors = {
+		normal = config.colors.normal or utils.get_bg('ModesNormal', '#608B4E'),
+		copy = config.colors.copy or utils.get_bg('ModesCopy', '#f5c359'),
+		delete = config.colors.delete or utils.get_bg('ModesDelete', '#c75c6a'),
+		insert = config.colors.insert or utils.get_bg('ModesInsert', '#569CD6'),
+		visual = config.colors.visual or utils.get_bg('ModesVisual', '#C586C0'),
+		pending = config.colors.pending
+			or utils.get_bg('ModesVisual', '#4ec9b0'),
+		command = config.colors.command
+			or utils.get_bg('ModesCommand', '#deb974'),
+		replace = config.colors.replace
+			or utils.get_bg('ModesReplace', '#e3a5a5'),
+		history = config.colors.history
+			or utils.get_bg('ModesReplace', '#9745be'),
+	}
+	blended_colors = {
+		normal = utils.blend(
+			colors.normal,
+			normal_bg,
+			config.line_opacity.normal
+		),
+		copy = utils.blend(colors.copy, normal_bg, config.line_opacity.copy),
+		delete = utils.blend(
+			colors.delete,
+			normal_bg,
+			config.line_opacity.delete
+		),
+		insert = utils.blend(
+			colors.insert,
+			normal_bg,
+			config.line_opacity.insert
+		),
+		visual = utils.blend(
+			colors.visual,
+			normal_bg,
+			config.line_opacity.visual
+		),
+		pending = utils.blend(
+			colors.pending,
+			normal_bg,
+			config.line_opacity.pending
+		),
+		command = utils.blend(
+			colors.command,
+			normal_bg,
+			config.line_opacity.command
+		),
+		replace = utils.blend(
+			colors.replace,
+			normal_bg,
+			config.line_opacity.replace
+		),
+		history = utils.blend(
+			colors.history,
+			normal_bg,
+			config.line_opacity.history
+		),
+	}
+
+	---Create highlight groups
+	vim.cmd('hi ModesNormal guibg=' .. colors.normal)
+	vim.cmd('hi ModesCopy guibg=' .. colors.copy)
+	vim.cmd('hi ModesDelete guibg=' .. colors.delete)
+	vim.cmd('hi ModesInsert guibg=' .. colors.insert)
+	vim.cmd('hi ModesVisual guibg=' .. colors.visual)
+	vim.cmd('hi ModesPending guibg=' .. colors.pending)
+	vim.cmd('hi ModesCommand guibg=' .. colors.command)
+	vim.cmd('hi ModesReplace guibg=' .. colors.replace)
+	vim.cmd('hi ModesHistory guibg=' .. colors.history)
+
+	for _, mode in ipairs({
+		'Normal',
+		'Copy',
+		'Delete',
+		'Insert',
+		'Visual',
+		'Pending',
+		'Command',
+		'Replace',
+		'History',
+	}) do
+		local def =
+			{ fg = colors[mode:lower()], bg = blended_colors[mode:lower()] }
+		local bg_def = { bg = blended_colors[mode:lower()] }
+		utils.set_hl(('Modes%sCursorLine'):format(mode), bg_def)
+		utils.set_hl(('Modes%sCursorLineNr'):format(mode), def)
+		utils.set_hl(('Modes%sCursorLineSign'):format(mode), bg_def)
+		utils.set_hl(('Modes%sCursorLineFold'):format(mode), bg_def)
+	end
+
+	utils.set_hl('ModesInsertModeMsg', { fg = colors.insert })
+	utils.set_hl('ModesVisualModeMsg', { fg = colors.visual })
+	utils.set_hl('ModesVisualVisual', { bg = blended_colors.visual })
+
+	if config.set_yanked_background then
+		vim.api.nvim_create_autocmd('TextYankPost', {
+			pattern = '*',
+			command = [[silent! lua require'vim.highlight'.on_yank({higroup="TextYanked", timeout = 500})]],
+			desc = 'Highlight yanked text',
+		})
+
+		utils.set_hl('TextYanked', { bg = blended_colors.copy })
+	end
+end
+
+local group = vim.api.nvim_create_augroup('NvimModesCursor', { clear = true })
+local block_cursor_timer
+
+local function block_insert()
 	if block_cursor_timer then
 		block_cursor_timer:stop()
 	end
@@ -25,320 +268,237 @@ function modes.block_insert()
 	end, 1000)
 end
 
-function modes.vertline_insert()
+local function vertline_insert()
 	vim.cmd([[execute 'set guicursor-=i:block-ModesInsert']])
 	vim.cmd([[execute 'set guicursor+=i:ver10-ModesInsert']])
 end
 
-local set_current_line_highlight = function(fg, bg)
-	vim.cmd('hi CursorLineNr guifg=' .. fg .. ' guibg=' .. bg)
-end
-
-function modes.set_highlights(style)
-	-- if style == "init" then
-	--   vim.cmd("hi CursorLine guibg=" .. init_colors.cursor_line)
-	--   vim.cmd("hi CursorLineNr guifg=" .. init_colors.cursor_line_nr)
-	--   vim.cmd("hi ModeMsg guifg=" .. init_colors.mode_msg)
-	-- end
-
-	if style == 'normal' then
-		vim.cmd('hi CursorLine guibg=' .. dim_colors.normal)
-		set_current_line_highlight(colors.normal, dim_colors.normal)
-		vim.cmd('hi ModeMsg guifg=' .. colors.normal)
+M.enable_managed_ui = function()
+	if in_ignored_buffer() then
+		return
 	end
 
-	
-	if style == 'replace' then
-		vim.cmd('hi CursorLine guibg=' .. dim_colors.replace)
-		set_current_line_highlight(colors.replace, dim_colors.replace)
-		vim.cmd('hi ModeMsg guifg=' .. colors.replace)
-		vim.cmd('hi! ModesOperator guifg=NONE guibg=NONE')
-		vim.cmd('hi! link ModesOperator ModesReplace')
-		vim.cmd('hi! ModesOperatorText guifg=NONE guibg=NONE')
-		vim.cmd('hi! link ModesOperatorText ModesReplaceText')
+	if config.set_cursor then
+		vim.opt.guicursor:append('n:block-ModesNormalCursor')
+		vim.opt.guicursor:append('v-sm:block-ModesVisual')
+		vim.opt.guicursor:append('i-ci-ve:ver25-ModesInsert')
+		vim.opt.guicursor:append('o:block-ModesOperatorCursor')
+		vim.opt.guicursor:append('r:hor20-ModesReplace')
+		vim.opt.guicursor:append('c:block-ModesCommand')
+
+		vim.api.nvim_create_autocmd('CursorHoldI', {
+			callback = block_insert,
+			group = group,
+			desc = 'Insert mode block cursor on hold',
+		})
+
+		vim.api.nvim_create_autocmd('CursorMovedI', {
+			callback = vertline_insert,
+			group = group,
+			desc = 'Insert mode vertical line cursor on type',
+		})
 	end
 
-	if style == 'insert' then
-		vim.cmd('hi CursorLine guibg=' .. dim_colors.insert)
-		set_current_line_highlight(colors.insert, dim_colors.insert)
-		vim.cmd('hi ModeMsg guifg=' .. colors.insert)
-	end
-
-	if style == 'visual' then
-		vim.cmd('hi CursorLine guibg=' .. dim_colors.visual)
-		set_current_line_highlight(colors.visual, dim_colors.visual)
-		vim.cmd('hi ModeMsg guifg=' .. colors.visual)
-	end
-
-	if style == 'pending' then
-		vim.cmd('hi CursorLine guibg=' .. dim_colors.pending)
-		set_current_line_highlight(colors.pending, dim_colors.pending)
-		vim.cmd('hi ModeMsg guifg=' .. colors.pending)
-		vim.cmd('hi! ModesOperator guifg=NONE guibg=NONE')
-		vim.cmd('hi! link ModesOperator ModesPending')
-		vim.cmd('hi! ModesOperatorText guifg=NONE guibg=NONE')
-		vim.cmd('hi! link ModesOperatorText ModesPendingText')
+	if config.set_cursorline then
+		vim.opt.cursorline = true
 	end
 end
 
-function modes.set_colors()
-	init_colors = {
-		cursor_line = util.get_bg_from_hl('CursorLine', 'CursorLine'),
-		cursor_line_nr = util.get_fg_from_hl('CursorLineNr', 'CursorLineNr'),
-		mode_msg = util.get_fg_from_hl('ModeMsg', 'ModeMsg'),
-		normal = util.get_bg_from_hl('Normal', 'Normal'),
-	}
-	colors = {
-		normal = config.colors.normal
-			or util.get_bg_from_hl('ModesNormal', '#608B4E'),
-		replace = config.colors.replace
-			or util.get_bg_from_hl('ModesReplace', '#e3a5a5'),
-		insert = config.colors.insert
-			or util.get_bg_from_hl('ModesInsert', '#569CD6'),
-		visual = config.colors.visual
-			or util.get_bg_from_hl('ModesVisual', '#C586C0'),
-		command = config.colors.copy
-			or util.get_bg_from_hl('ModesCommand', '#deb974'),
-		pending = config.colors.pending
-			or util.get_bg_from_hl('ModesPending', '#4ec9b0'),
-	}
-	dim_colors = {
-		normal = util.blend(
-			colors.normal,
-			init_colors.normal,
-			config.line_opacity.normal
-		),
-		insert = util.blend(
-			colors.insert,
-			init_colors.normal,
-			config.line_opacity.insert
-		),
-		visual = util.blend(
-			colors.visual,
-			init_colors.normal,
-			config.line_opacity.visual
-		),
-		command = util.blend(
-			colors.command,
-			init_colors.normal,
-			config.line_opacity.command
-		),
-		replace = util.blend(
-			colors.replace,
-			init_colors.normal,
-			config.line_opacity.replace
-		),
-		pending = util.blend(
-			colors.pending,
-			init_colors.normal,
-			config.line_opacity.pending
-		),
-	}
+M.disable_managed_ui = function()
+	if in_ignored_buffer() then
+		return
+	end
 
-	vim.cmd('hi ModesNormal gui=bold guifg=#262626 guibg=' .. colors.normal)
-	vim.cmd('hi ModesInsert gui=bold guifg=#262626 guibg=' .. colors.insert)
-	vim.cmd('hi ModesVisual gui=bold guifg=#262626 guibg=' .. colors.visual)
-	vim.cmd('hi ModesCommand gui=bold guifg=#262626 guibg=' .. colors.command)
-	vim.cmd('hi ModesReplace gui=bold guifg=#262626 guibg=' .. colors.replace)
-	vim.cmd('hi ModesPending gui=bold guifg=#262626 guibg=' .. colors.pending)
+	if config.set_cursor then
+		vim.opt.guicursor:remove('n:block-ModesNormalCursor')
+		vim.opt.guicursor:remove('v-sm:block-ModesVisual')
+		vim.opt.guicursor:remove('i-ci-ve:ver25-ModesInsert')
+		vim.opt.guicursor:remove('o:block-ModesOperatorCursor')
+		vim.opt.guicursor:remove('r:hor20-ModesReplace')
+		vim.opt.guicursor:remove('c:block-ModesCommand')
+		vim.api.nvim_clear_autocmds({ group = group })
+	end
 
-	vim.cmd('hi ModesNormalText gui=bold guibg=#262626 guifg=' .. colors.normal)
-	vim.cmd('hi ModesInsertText gui=bold guibg=#262626 guifg=' .. colors.insert)
-	vim.cmd('hi ModesVisualText gui=bold guibg=#262626 guifg=' .. colors.visual)
-	vim.cmd(
-		'hi ModesReplaceText gui=bold guibg=#262626 guifg=' .. colors.replace
-	)
-	vim.cmd(
-		'hi ModesPendingText gui=bold guibg=#262626 guifg=' .. colors.pending
-	)
+	if config.set_cursorline then
+		vim.opt.cursorline = false
+	end
 end
 
----@class Colors
----@field copy string
----@field delete string
----@field insert string
----@field visual string
+local function delay_oprator_reset()
+	if reset_timer then
+		reset_timer:stop()
+	end
 
----@class Opacity
----@field copy number between 0 and 1
----@field delete number between 0 and 1
----@field insert number between 0 and 1
----@field visual number between 0 and 1
+	reset_timer = vim.defer_fn(function()
+		if vim.fn.mode() == 'n' then
+			M.reset()
+		end
+	end, reset_delay)
+end
 
----@class Config
----@field colors Colors
----@field line_opacity Opacity
----@field set_cursor boolean
----@field focus_only boolean
-
----@param opts Config
-function modes.setup(opts)
-	local default_config = {
-		-- Colors intentionally set to {} to prioritise theme values
-		colors = {},
-		line_opacity = {
-			normal = 0.15,
-			insert = 0.15,
-			visual = 0.15,
-			command = 0.15,
-			replace = 0.15,
-			pending = 0.15,
-		},
-		set_cursor = true,
-		focus_only = false,
-	}
+M.setup = function(opts)
 	opts = opts or default_config
+	if opts.focus_only then
+		print(
+			'modes.nvim – `focus_only` has been removed and is now the default behaviour'
+		)
+	end
 
-	-- Resolve configs in the following order:
-	-- 1. User config
-	-- 2. Theme highlights if present (eg. ModesCopy)
-	-- 3. Default config
 	config = vim.tbl_deep_extend('force', default_config, opts)
 
-	-- Allow overriding line opacity per colour
 	if type(config.line_opacity) == 'number' then
 		config.line_opacity = {
 			normal = config.line_opacity,
+			copy = config.line_opacity,
+			delete = config.line_opacity,
 			insert = config.line_opacity,
 			visual = config.line_opacity,
+			pending = config.line_opacity,
 			command = config.line_opacity,
 			replace = config.line_opacity,
-			pending = config.line_opacity,
 		}
 	end
 
-	-- Hack to ensure theme colors get loaded properly
-	modes.set_colors()
-	vim.defer_fn(function()
-		modes.set_colors()
-		modes.set_highlights('normal')
-	end, 0)
+	M.define()
 
-	-- Set common highlights
-	vim.cmd('hi Visual guibg=' .. dim_colors.visual)
+	vim.on_key(function(key)
+		local ok, current_mode = pcall(vim.fn.mode)
+		if not ok then
+			M.reset()
+			return
+		end
 
-	-- Set guicursor modes
-	if config.set_cursor then
-		vim.opt.guicursor:append('a-n:block-ModesNormal')
-		vim.opt.guicursor:append('v-sm:block-ModesVisual')
-		vim.opt.guicursor:append('i-ci-ve:ver25-ModesInsert')
-		vim.opt.guicursor:append('c:block-ModesCommand')
-		vim.opt.guicursor:append('cr-o:block-ModesOperator')
-		vim.opt.guicursor:append('r:ver25-ModesReplace')
-	end
+		if key == utils.get_termcode('<esc>') then
+			M.reset()
+		end
 
-	local on_key = vim.on_key or vim.register_keystroke_callback
-	on_key(function(key)
-		local current_mode = vim.fn.mode()
-
-		-- Normal mode
 		if current_mode == 'n' then
-			-- for some reason some plugins will use v and V to select regions
+			-- reset if coming back from operator pending mode
 			if
 				operator_started
-				or key == util.get_termcode('<esc>')
-				or vim.v.operator == 'g@'
-				or key == 'v'
-				or key == 'V'
+				and not (reset_timer and reset_timer:get_due_in() > 0)
 			then
-				modes.reset()
+				M.reset()
+				return
 			end
 
-			if (key == 'r' or key == 'c') and not operator_started then
-				modes.set_highlights('replace')
+			if key == 'c' then
+				M.highlight('insert')
 				operator_started = true
-				-- fix highlight only in normal mode (this accounts for s, S, and cc actions)
-				vim.defer_fn(function()
-					if vim.fn.mode() == 'n' then
-						modes.reset()
-					end
-				end, 0)
-			end
-				
-			if (key == 'y') and not operater_started then
-				operator_started = true
+				delay_oprator_reset()
+				return
 			end
 
+			if key == 'y' then
+				M.highlight('copy')
+				operator_started = true
+				delay_oprator_reset()
+				return
+			end
+
+			if key == 'd' then
+				M.highlight('delete')
+				operator_started = true
+
+				delay_oprator_reset()
+
+				return
+			end
+
+			if key == 'r' then
+				M.highlight('replace')
+				operator_started = true
+				return
+			end
+
+			if key == ':' or key == '/' then
+				M.highlight('command')
+				operator_started = true
+				return
+			end
+			if key == '@' then
+				M.highlight('pending')
+				operator_started = true
+				return
+			end
+
+			if key == 'u' or key == '' then
+				M.highlight('history')
+				vim.defer_fn(M.reset, reset_delay)
+				return
+			end
+		end
+
+		if key == utils.replace_termcodes('<esc>') then
+			M.reset()
+			return
 		end
 	end)
 
-	-- Set autocommands
-	local group =
-		vim.api.nvim_create_augroup('VSCodeVimModes', { clear = true })
-	vim.api.nvim_create_autocmd('BufEnter', {
-		command = 'set cursorline',
-		desc = 'Set cursroline when enter neovim',
-	})
-	vim.api.nvim_create_autocmd('BufLeave', {
-		command = 'set nocursorline',
-		desc = 'Disable cursorline when leaving neovim',
+	---Set highlights when colorscheme changes
+	vim.api.nvim_create_autocmd('ColorScheme', {
+		pattern = '*',
+		callback = M.define,
 	})
 
+	---Set insert highlight
+	vim.api.nvim_create_autocmd('InsertEnter', {
+		pattern = '*',
+		callback = function()
+			M.highlight('insert')
+		end,
+	})
+
+	---Reset insert highlight
 	vim.api.nvim_create_autocmd('ModeChanged', {
-		pattern = 'v:n,i:n,r:n',
-		callback = function()
-			modes.set_highlights('normal')
-		end,
-		desc = 'Reset to normal mode',
+		pattern = 'i:n',
+		callback = M.reset,
 	})
 
+	---Set visual highlight
 	vim.api.nvim_create_autocmd('ModeChanged', {
-		pattern = '*:i',
+		pattern = '*:[vV\x16]',
 		callback = function()
-			modes.set_highlights('insert')
+			M.highlight('visual')
 		end,
-		desc = 'Change cursor color when entering insert mode',
 	})
 
+	---Reset visual highlight
 	vim.api.nvim_create_autocmd('ModeChanged', {
-		pattern = 'n:v,n:,n:V',
-		callback = function()
-			modes.set_highlights('visual')
-		end,
-		desc = 'Change cursor color when entering visual mode',
+		pattern = '[vV\x16]:n',
+		callback = M.reset,
 	})
 
+	---Set replace highlight
 	vim.api.nvim_create_autocmd('ModeChanged', {
-		pattern = 'n:no',
+		pattern = 'n:r',
 		callback = function()
-			modes.set_highlights('pending')
+			M.highlight('replace')
 		end,
-		desc = 'Change cursor color when entering pending mode',
-	})
-	
-	vim.api.nvim_create_autocmd('ModeChanged', {
-		pattern = '*:r',
-		callback = function()
-			modes.set_highlights('replace')
-		end,
-		desc = 'Change cursor color when entering replace mode',
 	})
 
-	vim.api.nvim_create_autocmd('TextChanged', {
-		callback = function()
-			modes.set_highlights(style)
-			if timer then
-				timer:stop()
-			end
-			timer = vim.defer_fn(function()
-				modes.reset()
-				timer = nil
-			end, 300)
-		end,
-		desc = 'Change cursor color when text changed',
+	---Reset highlights
+	vim.api.nvim_create_autocmd({ 'CmdlineLeave', 'WinLeave' }, {
+		pattern = '*',
+		callback = M.reset,
 	})
 
-	vim.api.nvim_create_autocmd('CursorHoldI', {
-		callback = modes.block_insert,
-		group = group,
-		desc = 'Insert mode block cursor on hold',
+	---Enable managed UI initially
+	M.enable_managed_ui()
+
+	---Enable managed UI for current window
+	vim.api.nvim_create_autocmd('WinEnter', {
+		pattern = '*',
+		callback = M.enable_managed_ui,
 	})
 
-	vim.api.nvim_create_autocmd('CursorMovedI', {
-		callback = modes.vertline_insert,
-		group = group,
-		desc = 'Insert mode vertical line cursor on type',
+	---Disable managed UI for unfocused windows
+	vim.api.nvim_create_autocmd('WinLeave', {
+		pattern = '*',
+		callback = M.disable_managed_ui,
 	})
+
+	M.reset()
 end
 
-return modes
+return M
