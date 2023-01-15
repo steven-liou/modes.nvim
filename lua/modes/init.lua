@@ -336,6 +336,8 @@ local function delay_oprator_reset()
 	end, reset_delay)
 end
 
+local last_key_pressed = nil
+
 M.setup = function(opts)
 	opts = opts or default_config
 	if opts.focus_only then
@@ -362,6 +364,7 @@ M.setup = function(opts)
 	M.define()
 
 	vim.on_key(function(key)
+		last_key_pressed = key
 		local ok, current_mode = pcall(vim.fn.mode)
 		if not ok then
 			M.reset()
@@ -408,6 +411,7 @@ M.setup = function(opts)
 			if key == 'r' then
 				M.highlight('replace')
 				operator_started = true
+				delay_oprator_reset()
 				return
 			end
 
@@ -416,22 +420,12 @@ M.setup = function(opts)
 				operator_started = true
 				return
 			end
+
 			if key == '@' then
 				M.highlight('pending')
 				operator_started = true
 				return
 			end
-
-			if key == 'u' or key == '' then
-				M.highlight('history')
-				vim.defer_fn(M.reset, reset_delay)
-				return
-			end
-		end
-
-		if key == utils.replace_termcodes('<esc>') then
-			M.reset()
-			return
 		end
 	end)
 
@@ -474,6 +468,17 @@ M.setup = function(opts)
 		pattern = 'n:r',
 		callback = function()
 			M.highlight('replace')
+		end,
+	})
+
+	---Set history highlight
+	vim.api.nvim_create_autocmd('TextChanged', {
+		pattern = '*',
+		callback = function()
+			if last_key_pressed == 'u' or last_key_pressed == '' then
+				M.highlight('history')
+			end
+			delay_oprator_reset()
 		end,
 	})
 
