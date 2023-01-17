@@ -25,31 +25,64 @@ use({
 Default colors can be overridden by passing values to the setup function or updating highlight groups.
 
 ```lua
-require('modes').setup({
-  colors = {
+require("modes").setup({
+	colors = {
+		normal = "#608b4e",
+		insert = "#569cd6",
+		visual = "#c586c0",
+		replace = "#d16969",
+		command = "#deb974",
+    pending = "#4ec9b0",
     copy = "#f5c359",
-    delete = "#c75c6a",
-    insert = "#78ccc5",
-    visual = "#9745be",
-  },
+    delete = "#c75c6a"
+		history = "#9745be",
+	},
 
-  -- Cursorline highlight opacity
-  line_opacity = 0.1,
+	-- Cursorline highlight opacity
+	line_opacity = {
+		normal = 0.1,
+    insert = 0.1,
+    visual = 0.1,
+    replace = 0.1,
+    command = 0.1,
+    pending = 0.1,
+		copy = 0.1,
+		delete = 0.1,
+		history = 0.1,
+	},
 
-  -- Highlight cursor
-  set_cursor = true,
+	-- Highlight cursor
+	set_cursor = true,
 
-  -- Highlight in active window only
-  focus_only = false
+	-- Enable cursorline initially, and disable cursorline for inactive windows
+	-- or ignored filetypes
+	set_cursorline = true,
+
+	-- Enable line number highlights to match cursorline
+	set_number = true,
+
+  -- Enable highlight background after text yank (uses copy)
+	set_yanked_background = true,
+
+	-- Highlight in active window only
+	focus_only = false,
+
+	-- Disable modes highlights in specified filetypes
+	ignore_filetypes = {'NvimTree', 'TelescopePrompt'},
 })
 ```
 
 ```lua
 -- Exposed highlight groups, useful for themes
+vim.cmd('hi ModesNormal guibg=#608b4e')
+vim.cmd('hi ModesInsert guibg=#569cd6')
+vim.cmd('hi ModesVisual guibg=#c586d0')
+vim.cmd('hi ModesReplace guibg=#d16969')
+vim.cmd('hi ModesCommand guibg=#deb974')
+vim.cmd('hi ModesPending guibg=#78ccc5')
 vim.cmd('hi ModesCopy guibg=#f5c359')
 vim.cmd('hi ModesDelete guibg=#c75c6a')
-vim.cmd('hi ModesInsert guibg=#78ccc5')
-vim.cmd('hi ModesVisual guibg=#9745be')
+vim.cmd('hi ModesHistory guibg=#9745be')
 ```
 
 ## Known issues
