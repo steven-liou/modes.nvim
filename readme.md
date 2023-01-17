@@ -8,7 +8,7 @@ Highlight UI elements based on current mode. Inspired by the recent addition of 
 
 ```lua
 use({
-  'mvllow/modes.nvim',
+  'steven-liou/modes.nvim',
   config = function()
     vim.opt.cursorline = true
     require('modes').setup()
@@ -32,20 +32,20 @@ require("modes").setup({
 		visual = "#c586c0",
 		replace = "#d16969",
 		command = "#deb974",
-    pending = "#4ec9b0",
-    copy = "#f5c359",
-    delete = "#c75c6a"
+                pending = "#4ec9b0",
+                copy = "#f5c359",
+                delete = "#c75c6a"
 		history = "#9745be",
 	},
 
 	-- Cursorline highlight opacity
 	line_opacity = {
 		normal = 0.1,
-    insert = 0.1,
-    visual = 0.1,
-    replace = 0.1,
-    command = 0.1,
-    pending = 0.1,
+		insert = 0.1,
+		visual = 0.1,
+		replace = 0.1,
+		command = 0.1,
+		pending = 0.1,
 		copy = 0.1,
 		delete = 0.1,
 		history = 0.1,
