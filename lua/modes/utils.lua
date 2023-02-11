@@ -42,6 +42,7 @@ end
 ---@class Color
 ---@field bg string
 ---@field fg string
+---@field gui string
 ---@field link string
 
 ---Set highlight
@@ -56,8 +57,11 @@ M.set_hl = function(name, color)
 
 	local bg = color.bg or 'none'
 	local fg = color.fg or 'none'
+	local gui = color.gui or 'none'
 
-	vim.cmd('hi default ' .. name .. ' guibg=' .. bg .. ' guifg=' .. fg)
+	vim.cmd(
+		'hi ' .. name .. ' guibg=' .. bg .. ' guifg=' .. fg .. ' gui=' .. gui
+	)
 end
 
 M.get_fg = function(name, fallback)
