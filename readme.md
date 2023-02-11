@@ -32,9 +32,9 @@ require("modes").setup({
 		visual = "#c586c0",
 		replace = "#d16969",
 		command = "#deb974",
-                pending = "#4ec9b0",
-                copy = "#f5c359",
-                delete = "#c75c6a"
+        pending = "#4ec9b0",
+        copy = "#f5c359",
+        delete = "#c75c6a"
 		history = "#9745be",
 	},
 
@@ -50,6 +50,14 @@ require("modes").setup({
 		delete = 0.1,
 		history = 0.1,
 	},
+    -- Highlight lualine
+	lualine = {
+		enabled = true,
+		diff_component = "x",
+		diagnostics_component = "c",
+		filetype_component = "y",
+	},
+
 
 	-- Highlight cursor
 	set_cursor = true,

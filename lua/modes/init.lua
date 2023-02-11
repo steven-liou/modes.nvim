@@ -157,7 +157,9 @@ M.highlight = function(scene_event)
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesCopy' })
 		end
 	end
-	if config.lualine then
+
+	local lualine = config.lualine
+	if lualine.enabled then
 		local fg_def =
 			{ fg = colors.black_text, bg = colors[scene_name], gui = 'bold' }
 		local bg_def =
@@ -179,35 +181,53 @@ M.highlight = function(scene_event)
 		utils.set_hl(('lualine_c_%s'):format(scene_event), bg_def)
 		utils.set_hl(('lualine_y_%s'):format(scene_event), statusbar_def)
 		utils.set_hl(
-			('lualine_y_file_type_DevIconLua_%s'):format(scene_event),
+			('lualine_' .. lualine.filetype_component .. '_type_DevIconLua_%s'):format(
+				scene_event
+			),
 			statusbar_def
 		)
 		utils.set_hl(
-			('lualine_x_diagnostics_error'):format(scene_event),
+			(
+				'lualine_'
+				.. lualine.diagnostics_component
+				.. '_diagnostics_error'
+			):format(scene_event),
 			{ fg = colors.delete, bg = shaded_colors[scene_name] }
 		)
 		utils.set_hl(
-			('lualine_x_diagnostics_warn'):format(scene_event),
+			('lualine_' .. lualine.diagnostics_component .. '_diagnostics_warn'):format(
+				scene_event
+			),
 			{ fg = colors.command, bg = shaded_colors[scene_name] }
 		)
 		utils.set_hl(
-			('lualine_x_diagnostics_hint'):format(scene_event),
+			('lualine_' .. lualine.diagnostics_component .. '_diagnostics_hint'):format(
+				scene_event
+			),
 			{ fg = colors.pending, bg = shaded_colors[scene_name] }
 		)
 		utils.set_hl(
-			('lualine_x_diagnostics_info'):format(scene_event),
+			('lualine_' .. lualine.diagnostics_component .. '_diagnostics_info'):format(
+				scene_event
+			),
 			{ fg = colors.insert, bg = shaded_colors[scene_name] }
 		)
 		utils.set_hl(
-			('lualine_x_diff_added'):format(scene_event),
+			('lualine_' .. lualine.diff_component .. '_diff_added'):format(
+				scene_event
+			),
 			{ fg = colors.pending, bg = shaded_colors[scene_name] }
 		)
 		utils.set_hl(
-			('lualine_x_diff_modified'):format(scene_event),
+			('lualine_' .. lualine.diff_component .. '_diff_modified'):format(
+				scene_event
+			),
 			{ fg = colors.command, bg = shaded_colors[scene_name] }
 		)
 		utils.set_hl(
-			('lualine_x_diff_removed'):format(scene_event),
+			('lualine_' .. lualine.diff_component .. '_diff_removed'):format(
+				scene_event
+			),
 			{ fg = colors.delete, bg = shaded_colors[scene_name] }
 		)
 	end
