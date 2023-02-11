@@ -94,8 +94,8 @@ M.reset = function()
 end
 
 ---Update highlights
----@param scene 'normal'|'insert'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'pending' | 'history'
-M.highlight = function(scene)
+---@param scene_event 'normal'|'insert'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'char_replace' | 'pending' | 'history'
+M.highlight = function(scene_event)
 	if in_ignored_buffer() then
 		return
 	end
@@ -111,8 +111,14 @@ M.highlight = function(scene)
 		end
 	end
 
+	-- map keymap events to actual scene names
+	local scene_name = scene_event
+	if scene_name == 'char_replace' then
+		scene_name = 'replace'
+	end
+
 	-- overrides 'builtin':'hl' if the current scene has a mapping for it
-	for builtin, hl in pairs(winhighlight[scene]) do
+	for builtin, hl in pairs(winhighlight[scene_name]) do
 		winhl_map[builtin] = hl
 	end
 
@@ -123,49 +129,54 @@ M.highlight = function(scene)
 	vim.api.nvim_win_set_option(0, 'winhighlight', table.concat(new_value, ','))
 
 	if vim.api.nvim_get_option('showmode') then
-		if scene == 'visual' then
+		if scene_event == 'visual' then
 			utils.set_hl('ModeMsg', { link = 'ModesVisualModeMsg' })
-		elseif scene == 'insert' then
+		elseif scene_event == 'insert' then
 			utils.set_hl('ModeMsg', { link = 'ModesInsertModeMsg' })
 		end
 	end
 
 	if config.set_cursor then
-		if scene == 'normal' then
+		if scene_event == 'normal' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesNormal' })
-		elseif scene == 'delete' then
+		elseif scene_event == 'delete' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesDelete' })
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesDelete' })
-		elseif scene == 'insert' then
+		elseif scene_event == 'insert' then
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesInsert' })
-		elseif scene == 'copy' then
+		elseif scene_event == 'copy' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesCopy' })
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesCopy' })
-		elseif scene == 'pending' then
+		elseif scene_event == 'pending' then
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesPending' })
 			utils.set_hl('ModesNormalCursor', { link = 'ModesPending' })
-		elseif scene == 'history' then
+		elseif scene_event == 'history' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesHistory' })
+		elseif scene_event == 'char_replace' then
+			utils.set_hl('ModesNormalCursor', { link = 'ModesCopy' })
+			utils.set_hl('ModesOperatorCursor', { link = 'ModesCopy' })
 		end
 	end
 	if config.lualine then
 		local fg_def =
-			{ fg = colors.black_text, bg = colors[scene], gui = 'bold' }
-		local bg_def = { fg = colors.white_text, bg = shaded_colors[scene] }
+			{ fg = colors.black_text, bg = colors[scene_name], gui = 'bold' }
+		local bg_def =
+			{ fg = colors.white_text, bg = shaded_colors[scene_name] }
 		local statusbar_def =
-			{ fg = colors[scene], bg = statusbar_colors[scene] }
+			{ fg = colors[scene_event], bg = statusbar_colors[scene_name] }
 		if
-			scene == 'delete'
-			or scene == 'pending'
-			or scene == 'copy'
-			or scene == 'history'
+			scene_event == 'copy'
+			or scene_event == 'delete'
+			or scene_event == 'pending'
+			or scene_event == 'char_replace'
+			or scene_event == 'history'
 		then
-			scene = 'normal'
+			scene_event = 'normal'
 		end
-		utils.set_hl(('lualine_a_%s'):format(scene), fg_def)
-		utils.set_hl(('lualine_b_%s'):format(scene), statusbar_def)
-		utils.set_hl(('lualine_c_%s'):format(scene), bg_def)
-		utils.set_hl(('lualine_y_%s'):format(scene), statusbar_def)
+		utils.set_hl(('lualine_a_%s'):format(scene_event), fg_def)
+		utils.set_hl(('lualine_b_%s'):format(scene_event), statusbar_def)
+		utils.set_hl(('lualine_c_%s'):format(scene_event), bg_def)
+		utils.set_hl(('lualine_y_%s'):format(scene_event), statusbar_def)
 	end
 end
 
@@ -186,7 +197,7 @@ M.define = function()
 		replace = config.colors.replace
 			or utils.get_bg('ModesReplace', '#e3a5a5'),
 		history = config.colors.history
-			or utils.get_bg('ModesReplace', '#9745be'),
+			or utils.get_bg('ModesHistory', '#9745be'),
 	}
 	shaded_colors = {
 		normal = utils.blend(
@@ -481,7 +492,7 @@ M.setup = function(opts)
 			end
 
 			if key == 'r' then
-				M.highlight('replace')
+				M.highlight('char_replace')
 				operator_started = true
 				delay_oprator_reset()
 				return
