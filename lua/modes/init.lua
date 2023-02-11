@@ -152,7 +152,8 @@ M.highlight = function(scene)
 		local fg_def =
 			{ fg = colors.black_text, bg = colors[scene], gui = 'bold' }
 		local bg_def = { fg = colors.white_text, bg = shaded_colors[scene] }
-		local statusbar_def = { fg = colors.text, bg = statusbar_colors[scene] }
+		local statusbar_def =
+			{ fg = colors[scene], bg = statusbar_colors[scene] }
 		if
 			scene == 'delete'
 			or scene == 'pending'
