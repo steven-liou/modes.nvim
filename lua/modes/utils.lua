@@ -129,47 +129,47 @@ M.define_lualine_colors = function(config, opacity_name)
 	local colors = config.colors
 	M.set_opacity(config.lualine, opacity_name)
 	return {
-		normal = utils.blend(
+		normal = M.blend(
 			colors.normal,
 			normal_bg,
 			config.lualine[opacity_name].normal
 		),
-		copy = utils.blend(
+		copy = M.blend(
 			colors.copy,
 			normal_bg,
 			config.lualine[opacity_name].copy
 		),
-		delete = utils.blend(
+		delete = M.blend(
 			colors.delete,
 			normal_bg,
 			config.lualine[opacity_name].delete
 		),
-		insert = utils.blend(
+		insert = M.blend(
 			colors.insert,
 			normal_bg,
 			config.lualine[opacity_name].insert
 		),
-		visual = utils.blend(
+		visual = M.blend(
 			colors.visual,
 			normal_bg,
 			config.lualine[opacity_name].visual
 		),
-		pending = utils.blend(
+		pending = M.blend(
 			colors.pending,
 			normal_bg,
 			config.lualine[opacity_name].pending
 		),
-		command = utils.blend(
+		command = M.blend(
 			colors.command,
 			normal_bg,
 			config.lualine[opacity_name].command
 		),
-		replace = utils.blend(
+		replace = M.blend(
 			colors.replace,
 			normal_bg,
 			config.lualine[opacity_name].replace
 		),
-		history = utils.blend(
+		history = M.blend(
 			colors.history,
 			normal_bg,
 			config.lualine[opacity_name].history

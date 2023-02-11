@@ -78,6 +78,7 @@ require("modes").setup({
 		diff_component = "x",
 		diagnostics_component = "x",
 		filetype_component = "y",
+		aerial_component = "c",
 	},
 
 

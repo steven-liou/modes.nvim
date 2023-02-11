@@ -1,5 +1,6 @@
 local utils = require('modes.utils')
 local lualine = require('modes.lualine')
+local aerial = require('modes.aerial')
 local reset_delay = 500
 local reset_timer = nil
 
@@ -158,6 +159,7 @@ M.highlight = function(scene_event)
 	end
 
 	lualine.highlight(config, scene_event, scene_name)
+	aerial.highlight(config, scene_event, scene_name)
 end
 
 M.define = function()
@@ -227,6 +229,7 @@ M.define = function()
 	config.colors = colors
 	config.shaded_colors = shaded_colors
 	lualine.define(config)
+	aerial.define(config)
 
 	---Create highlight groups
 	vim.cmd('hi ModesNormal guibg=' .. colors.normal)

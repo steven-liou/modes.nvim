@@ -1,17 +1,45 @@
 local utils = require('modes.utils')
-local statusbar_side_colors = {}
 local statusbar_middle_colors = {}
+local lsp_kinds = {
+	'File',
+	'Module',
+	'Namespace',
+	'Package',
+	'Class',
+	'Method',
+	'Property',
+	'Field',
+	'Constructor',
+	'Enum',
+	'Interface',
+	'Function',
+	'Variable',
+	'Constant',
+	'String',
+	'Number',
+	'Boolean',
+	'Array',
+	'Object',
+	'Key',
+	'Null',
+	'Enum',
+	'Struct',
+	'Event',
+	'Operator',
+	'Type',
+}
 local M = {}
 
 M.define = function(config)
-	statusbar_side_colors =
-		utils.define_lualine_colors(config, 'statusbar_side_opacity')
 	statusbar_middle_colors =
 		utils.define_lualine_colors(config, 'statusbar_middle_opacity')
 end
 
 M.highlight = function(config, scene_event, scene_name)
-	if not config.lualine.enabled then
+	if
+		not config.lualine.enabled
+		and type(config.lualine.aerial_component) ~= 'string'
+	then
 		return
 	end
 
@@ -21,8 +49,6 @@ M.highlight = function(config, scene_event, scene_name)
 		{ fg = colors.black_text, bg = colors[scene_name], gui = 'bold' }
 	local bg_def =
 		{ fg = colors.white_text, bg = statusbar_middle_colors[scene_name] }
-	local statusbar_def =
-		{ fg = colors[scene_event], bg = statusbar_side_colors[scene_name] }
 
 	if
 		scene_event == 'copy'
@@ -33,57 +59,46 @@ M.highlight = function(config, scene_event, scene_name)
 	then
 		scene_event = 'normal'
 	end
-	utils.set_hl(('lualine_a_%s'):format(scene_event), fg_def)
-	utils.set_hl(('lualine_b_%s'):format(scene_event), statusbar_def)
-	utils.set_hl(('lualine_c_%s'):format(scene_event), bg_def)
-	utils.set_hl(('lualine_x_%s'):format(scene_event), statusbar_def)
-	utils.set_hl(('lualine_y_%s'):format(scene_event), statusbar_def)
 
-	-- local ft = utils.titlecase(vim.bo.filetype)
-	-- local filetype_highlight_name = (
-	-- 	'lualine_'
-	-- 	.. lualine.filetype_component
-	-- 	.. '_filetype_DevIcon%s_%s'
-	-- ):format(ft, scene_event)
-	-- local ok, ft_colors =
-	-- 	pcall(vim.api.nvim_get_hl_by_name, filetype_highlight_name, true)
+	-- "lualine_c_aerial_Key_insert"
+	for _, kind in ipairs(lsp_kinds) do
+		local aerial_kind_highlight_name = ('lualine_%s_aerial_%s_%s'):format(
+			config.lualine.aerial_component,
+			kind,
+			scene_event
+		)
+		local ok, aerial_kind_colors =
+			pcall(vim.api.nvim_get_hl_by_name, aerial_kind_highlight_name, true)
 
-	-- if ok and ft_colors.foreground then
-	-- 	local fg_color = '#' .. string.format('%06x', ft_colors.foreground)
-	-- 	utils.set_hl(filetype_highlight_name, {
-	-- 		fg = fg_color,
-	-- 		bg = statusbar_middle_colors[scene_name],
-	-- 	})
-	-- end
+		if ok and aerial_kind_colors.foreground then
+			local fg_color = '#'
+				.. string.format('%06x', aerial_kind_colors.foreground)
+			utils.set_hl(aerial_kind_highlight_name, {
+				fg = fg_color,
+				bg = statusbar_middle_colors[scene_name],
+			})
+		end
 
-	utils.set_hl(
-		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_error',
-		{ fg = colors.delete, bg = statusbar_middle_colors[scene_name] }
-	)
-	utils.set_hl(
-		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_warn',
-		{ fg = colors.command, bg = statusbar_middle_colors[scene_name] }
-	)
-	utils.set_hl(
-		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_hint',
-		{ fg = colors.pending, bg = statusbar_middle_colors[scene_name] }
-	)
-	utils.set_hl(
-		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_info',
-		{ fg = colors.insert, bg = statusbar_middle_colors[scene_name] }
-	)
-	utils.set_hl(
-		'lualine_' .. lualine.diff_component .. '_diff_added',
-		{ fg = colors.pending, bg = statusbar_middle_colors[scene_name] }
-	)
-	utils.set_hl(
-		'lualine_' .. lualine.diff_component .. '_diff_modified',
-		{ fg = colors.command, bg = statusbar_middle_colors[scene_name] }
-	)
-	utils.set_hl(
-		'lualine_' .. lualine.diff_component .. '_diff_removed',
-		{ fg = colors.delete, bg = statusbar_middle_colors[scene_name] }
-	)
+		local aerial_kind_icon_highlight_name = ('lualine_%s_aerial_%sIcon_%s'):format(
+			config.lualine.aerial_component,
+			kind,
+			scene_event
+		)
+		local ok, aerial_kind_icon_colors = pcall(
+			vim.api.nvim_get_hl_by_name,
+			aerial_kind_icon_highlight_name,
+			true
+		)
+
+		if ok and aerial_kind_icon_colors.foreground then
+			local fg_color = '#'
+				.. string.format('%06x', aerial_kind_icon_colors.foreground)
+			utils.set_hl(aerial_kind_icon_highlight_name, {
+				fg = fg_color,
+				bg = statusbar_middle_colors[scene_name],
+			})
+		end
+	end
 end
 
 return M

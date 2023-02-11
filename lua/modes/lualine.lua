@@ -4,107 +4,10 @@ local statusbar_middle_colors = {}
 local M = {}
 
 M.define = function(config)
-	local normal_bg = utils.get_bg('Normal', 'Normal')
-	local colors = config.colors
-	local statusbar_offset = 0.05
-	utils.set_opacity(config.lualine, 'statusbar_side_opacity')
-	utils.set_opacity(config.lualine, 'statusbar_middle_opacity')
-
-	statusbar_side_colors = {
-		normal = utils.blend(
-			colors.normal,
-			normal_bg,
-			config.lualine.statusbar_side_opacity.normal
-		),
-		copy = utils.blend(
-			colors.copy,
-			normal_bg,
-			config.lualine.statusbar_side_opacity.copy
-		),
-		delete = utils.blend(
-			colors.delete,
-			normal_bg,
-			config.lualine.statusbar_side_opacity.delete
-		),
-		insert = utils.blend(
-			colors.insert,
-			normal_bg,
-			config.lualine.statusbar_side_opacity.insert
-		),
-		visual = utils.blend(
-			colors.visual,
-			normal_bg,
-			config.lualine.statusbar_side_opacity.visual
-		),
-		pending = utils.blend(
-			colors.pending,
-			normal_bg,
-			config.lualine.statusbar_side_opacity.pending
-		),
-		command = utils.blend(
-			colors.command,
-			normal_bg,
-			config.lualine.statusbar_side_opacity.command
-		),
-		replace = utils.blend(
-			colors.replace,
-			normal_bg,
-			config.lualine.statusbar_side_opacity.replace
-		),
-		history = utils.blend(
-			colors.history,
-			normal_bg,
-			config.lualine.statusbar_side_opacity.history
-		),
-	}
-
-	statusbar_middle_colors = {
-		normal = utils.blend(
-			colors.normal,
-			normal_bg,
-			config.lualine.statusbar_middle_opacity.normal
-		),
-		copy = utils.blend(
-			colors.copy,
-			normal_bg,
-			config.lualine.statusbar_middle_opacity.copy
-		),
-		delete = utils.blend(
-			colors.delete,
-			normal_bg,
-			config.lualine.statusbar_middle_opacity.delete
-		),
-		insert = utils.blend(
-			colors.insert,
-			normal_bg,
-			config.lualine.statusbar_middle_opacity.insert
-		),
-		visual = utils.blend(
-			colors.visual,
-			normal_bg,
-			config.lualine.statusbar_middle_opacity.visual
-		),
-		pending = utils.blend(
-			colors.pending,
-			normal_bg,
-			config.lualine.statusbar_middle_opacity.pending
-		),
-		command = utils.blend(
-			colors.command,
-			normal_bg,
-			config.lualine.statusbar_middle_opacity.command
-		),
-		replace = utils.blend(
-			colors.replace,
-			normal_bg,
-			config.lualine.statusbar_middle_opacity.replace
-		),
-		history = utils.blend(
-			colors.history,
-			normal_bg,
-			config.lualine.statusbar_middle_opacity.history
-		),
-	}
+	statusbar_middle_colors =
+		utils.define_lualine_colors(config, 'statusbar_middle_opacity')
+	statusbar_side_colors =
+		utils.define_lualine_colors(config, 'statusbar_side_opacity')
 end
 
 M.highlight = function(config, scene_event, scene_name)
@@ -136,22 +39,22 @@ M.highlight = function(config, scene_event, scene_name)
 	utils.set_hl(('lualine_x_%s'):format(scene_event), statusbar_def)
 	utils.set_hl(('lualine_y_%s'):format(scene_event), statusbar_def)
 
-	-- local ft = utils.titlecase(vim.bo.filetype)
-	-- local filetype_highlight_name = (
-	-- 	'lualine_'
-	-- 	.. lualine.filetype_component
-	-- 	.. '_filetype_DevIcon%s_%s'
-	-- ):format(ft, scene_event)
-	-- local ok, ft_colors =
-	-- 	pcall(vim.api.nvim_get_hl_by_name, filetype_highlight_name, true)
+	local ft = utils.titlecase(vim.bo.filetype)
+	local filetype_highlight_name = (
+		'lualine_'
+		.. lualine.filetype_component
+		.. '_filetype_DevIcon%s_%s'
+	):format(ft, scene_event)
+	local ok, ft_colors =
+		pcall(vim.api.nvim_get_hl_by_name, filetype_highlight_name, true)
 
-	-- if ok and ft_colors.foreground then
-	-- 	local fg_color = '#' .. string.format('%06x', ft_colors.foreground)
-	-- 	utils.set_hl(filetype_highlight_name, {
-	-- 		fg = fg_color,
-	-- 		bg = statusbar_middle_colors[scene_name],
-	-- 	})
-	-- end
+	if ok and ft_colors.foreground then
+		local fg_color = '#' .. string.format('%06x', ft_colors.foreground)
+		utils.set_hl(filetype_highlight_name, {
+			fg = fg_color,
+			bg = statusbar_middle_colors[scene_name],
+		})
+	end
 
 	utils.set_hl(
 		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_error',
