@@ -124,4 +124,57 @@ M.print_table = function(table)
 	end
 end
 
+M.define_lualine_colors = function(config, opacity_name)
+	local normal_bg = M.get_bg('Normal', 'Normal')
+	local colors = config.colors
+	M.set_opacity(config.lualine, opacity_name)
+	return {
+		normal = utils.blend(
+			colors.normal,
+			normal_bg,
+			config.lualine[opacity_name].normal
+		),
+		copy = utils.blend(
+			colors.copy,
+			normal_bg,
+			config.lualine[opacity_name].copy
+		),
+		delete = utils.blend(
+			colors.delete,
+			normal_bg,
+			config.lualine[opacity_name].delete
+		),
+		insert = utils.blend(
+			colors.insert,
+			normal_bg,
+			config.lualine[opacity_name].insert
+		),
+		visual = utils.blend(
+			colors.visual,
+			normal_bg,
+			config.lualine[opacity_name].visual
+		),
+		pending = utils.blend(
+			colors.pending,
+			normal_bg,
+			config.lualine[opacity_name].pending
+		),
+		command = utils.blend(
+			colors.command,
+			normal_bg,
+			config.lualine[opacity_name].command
+		),
+		replace = utils.blend(
+			colors.replace,
+			normal_bg,
+			config.lualine[opacity_name].replace
+		),
+		history = utils.blend(
+			colors.history,
+			normal_bg,
+			config.lualine[opacity_name].history
+		),
+	}
+end
+
 return M

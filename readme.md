@@ -50,11 +50,33 @@ require("modes").setup({
 		delete = 0.1,
 		history = 0.1,
 	},
-    -- Highlight lualine
+	-- Highlight lualine
 	lualine = {
 		enabled = true,
+		statusbar_side_opacity = {
+			normal = 0.1,
+			copy = 0.2,
+			delete = 0.15,
+			insert = 0.10,
+			visual = 0.15,
+			command = 0.17,
+			replace = 0.15,
+			pending = 0.15,
+			history = 0.15,
+		},
+		statusbar_middle_opacity = {
+			normal = 0.08,
+			copy = 0.12,
+			delete = 0.12,
+			insert = 0.12,
+			visual = 0.12,
+			command = 0.12,
+			replace = 0.12,
+			pending = 0.12,
+			history = 0.12,
+		},
 		diff_component = "x",
-		diagnostics_component = "c",
+		diagnostics_component = "x",
 		filetype_component = "y",
 	},
 
