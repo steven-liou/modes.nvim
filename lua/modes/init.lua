@@ -1,4 +1,5 @@
 local utils = require('modes.utils')
+local lualine = require('modes.lualine')
 local reset_delay = 500
 local reset_timer = nil
 
@@ -80,8 +81,6 @@ local winhighlight = {
 }
 local colors = {}
 local shaded_colors = {}
-local statusbar_colors = {}
-local statusbar_offset = 0.05
 local operator_started = false
 local in_ignored_buffer = function()
 	return vim.tbl_contains(config.ignore_filetypes, vim.bo.filetype)
@@ -158,79 +157,7 @@ M.highlight = function(scene_event)
 		end
 	end
 
-	local lualine = config.lualine
-	if lualine.enabled then
-		local fg_def =
-			{ fg = colors.black_text, bg = colors[scene_name], gui = 'bold' }
-		local bg_def =
-			{ fg = colors.white_text, bg = shaded_colors[scene_name] }
-		local statusbar_def =
-			{ fg = colors[scene_event], bg = statusbar_colors[scene_name] }
-
-		if
-			scene_event == 'copy'
-			or scene_event == 'delete'
-			or scene_event == 'pending'
-			or scene_event == 'char_replace'
-			or scene_event == 'history'
-		then
-			scene_event = 'normal'
-		end
-		utils.set_hl(('lualine_a_%s'):format(scene_event), fg_def)
-		utils.set_hl(('lualine_b_%s'):format(scene_event), statusbar_def)
-		utils.set_hl(('lualine_c_%s'):format(scene_event), bg_def)
-		utils.set_hl(('lualine_y_%s'):format(scene_event), statusbar_def)
-		utils.set_hl(
-			('lualine_' .. lualine.filetype_component .. '_type_DevIconLua_%s'):format(
-				scene_event
-			),
-			statusbar_def
-		)
-		utils.set_hl(
-			(
-				'lualine_'
-				.. lualine.diagnostics_component
-				.. '_diagnostics_error'
-			):format(scene_event),
-			{ fg = colors.delete, bg = shaded_colors[scene_name] }
-		)
-		utils.set_hl(
-			('lualine_' .. lualine.diagnostics_component .. '_diagnostics_warn'):format(
-				scene_event
-			),
-			{ fg = colors.command, bg = shaded_colors[scene_name] }
-		)
-		utils.set_hl(
-			('lualine_' .. lualine.diagnostics_component .. '_diagnostics_hint'):format(
-				scene_event
-			),
-			{ fg = colors.pending, bg = shaded_colors[scene_name] }
-		)
-		utils.set_hl(
-			('lualine_' .. lualine.diagnostics_component .. '_diagnostics_info'):format(
-				scene_event
-			),
-			{ fg = colors.insert, bg = shaded_colors[scene_name] }
-		)
-		utils.set_hl(
-			('lualine_' .. lualine.diff_component .. '_diff_added'):format(
-				scene_event
-			),
-			{ fg = colors.pending, bg = shaded_colors[scene_name] }
-		)
-		utils.set_hl(
-			('lualine_' .. lualine.diff_component .. '_diff_modified'):format(
-				scene_event
-			),
-			{ fg = colors.command, bg = shaded_colors[scene_name] }
-		)
-		utils.set_hl(
-			('lualine_' .. lualine.diff_component .. '_diff_removed'):format(
-				scene_event
-			),
-			{ fg = colors.delete, bg = shaded_colors[scene_name] }
-		)
-	end
+	lualine.highlight(config, scene_event, scene_name)
 end
 
 M.define = function()
@@ -252,6 +179,7 @@ M.define = function()
 		history = config.colors.history
 			or utils.get_bg('ModesHistory', '#9745be'),
 	}
+
 	shaded_colors = {
 		normal = utils.blend(
 			colors.normal,
@@ -296,53 +224,9 @@ M.define = function()
 		),
 	}
 
-	statusbar_colors = {
-		normal = utils.blend(
-			colors.normal,
-			normal_bg,
-			config.line_opacity.normal + statusbar_offset
-		),
-		copy = utils.blend(
-			colors.copy,
-			normal_bg,
-			config.line_opacity.copy + statusbar_offset
-		),
-		delete = utils.blend(
-			colors.delete,
-			normal_bg,
-			config.line_opacity.delete + statusbar_offset
-		),
-		insert = utils.blend(
-			colors.insert,
-			normal_bg,
-			config.line_opacity.insert + statusbar_offset
-		),
-		visual = utils.blend(
-			colors.visual,
-			normal_bg,
-			config.line_opacity.visual + statusbar_offset
-		),
-		pending = utils.blend(
-			colors.pending,
-			normal_bg,
-			config.line_opacity.pending + statusbar_offset
-		),
-		command = utils.blend(
-			colors.command,
-			normal_bg,
-			config.line_opacity.command + statusbar_offset
-		),
-		replace = utils.blend(
-			colors.replace,
-			normal_bg,
-			config.line_opacity.replace + statusbar_offset
-		),
-		history = utils.blend(
-			colors.history,
-			normal_bg,
-			config.line_opacity.history + statusbar_offset
-		),
-	}
+	config.colors = colors
+	config.shaded_colors = shaded_colors
+	lualine.define(config)
 
 	---Create highlight groups
 	vim.cmd('hi ModesNormal guibg=' .. colors.normal)
@@ -484,18 +368,7 @@ M.setup = function(opts)
 
 	config = vim.tbl_deep_extend('force', default_config, opts)
 
-	if type(config.line_opacity) == 'number' then
-		config.line_opacity = {
-			normal = config.line_opacity,
-			copy = config.line_opacity,
-			delete = config.line_opacity,
-			insert = config.line_opacity,
-			visual = config.line_opacity,
-			pending = config.line_opacity,
-			command = config.line_opacity,
-			replace = config.line_opacity,
-		}
-	end
+	utils.set_opacity(config, 'line_opacity')
 
 	M.define()
 

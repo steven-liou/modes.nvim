@@ -103,4 +103,25 @@ function M.get_termcode(key)
 	return vim.api.nvim_replace_termcodes(key, true, true, true)
 end
 
+M.set_opacity = function(table, field, default_value)
+	default_value = default_value or 0.05
+	for key, val in pairs(table[field]) do
+		if type(val) == 'number' then
+			table[field][key] = val
+		else
+			table[field][key] = default_value
+		end
+	end
+end
+
+M.titlecase = function(str)
+	return (str:gsub('^%l', string.upper))
+end
+
+M.print_table = function(table)
+	for key, val in pairs(table) do
+		print(key, val)
+	end
+end
+
 return M
