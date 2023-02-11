@@ -79,7 +79,9 @@ local winhighlight = {
 	},
 }
 local colors = {}
-local blended_colors = {}
+local shaded_colors = {}
+local statusbar_colors = {}
+local statusbar_offset = 0.05
 local operator_started = false
 local in_ignored_buffer = function()
 	return vim.tbl_contains(config.ignore_filetypes, vim.bo.filetype)
@@ -146,11 +148,31 @@ M.highlight = function(scene)
 			utils.set_hl('ModesNormalCursor', { link = 'ModesHistory' })
 		end
 	end
+	if config.lualine then
+		local fg_def =
+			{ fg = colors.black_text, bg = colors[scene], gui = 'bold' }
+		local bg_def = { fg = colors.white_text, bg = shaded_colors[scene] }
+		local statusbar_def = { fg = colors.text, bg = statusbar_colors[scene] }
+		if
+			scene == 'delete'
+			or scene == 'pending'
+			or scene == 'copy'
+			or scene == 'history'
+		then
+			scene = 'normal'
+		end
+		utils.set_hl(('lualine_a_%s'):format(scene), fg_def)
+		utils.set_hl(('lualine_b_%s'):format(scene), statusbar_def)
+		utils.set_hl(('lualine_c_%s'):format(scene), bg_def)
+		utils.set_hl(('lualine_y_%s'):format(scene), statusbar_def)
+	end
 end
 
 M.define = function()
 	local normal_bg = utils.get_bg('Normal', 'Normal')
 	colors = {
+		black_text = config.colors.text or '#1e1e1e',
+		white_text = config.colors.white_text or '#d4d4d4',
 		normal = config.colors.normal or utils.get_bg('ModesNormal', '#608B4E'),
 		copy = config.colors.copy or utils.get_bg('ModesCopy', '#f5c359'),
 		delete = config.colors.delete or utils.get_bg('ModesDelete', '#c75c6a'),
@@ -165,7 +187,7 @@ M.define = function()
 		history = config.colors.history
 			or utils.get_bg('ModesReplace', '#9745be'),
 	}
-	blended_colors = {
+	shaded_colors = {
 		normal = utils.blend(
 			colors.normal,
 			normal_bg,
@@ -209,6 +231,54 @@ M.define = function()
 		),
 	}
 
+	statusbar_colors = {
+		normal = utils.blend(
+			colors.normal,
+			normal_bg,
+			config.line_opacity.normal + statusbar_offset
+		),
+		copy = utils.blend(
+			colors.copy,
+			normal_bg,
+			config.line_opacity.copy + statusbar_offset
+		),
+		delete = utils.blend(
+			colors.delete,
+			normal_bg,
+			config.line_opacity.delete + statusbar_offset
+		),
+		insert = utils.blend(
+			colors.insert,
+			normal_bg,
+			config.line_opacity.insert + statusbar_offset
+		),
+		visual = utils.blend(
+			colors.visual,
+			normal_bg,
+			config.line_opacity.visual + statusbar_offset
+		),
+		pending = utils.blend(
+			colors.pending,
+			normal_bg,
+			config.line_opacity.pending + statusbar_offset
+		),
+		command = utils.blend(
+			colors.command,
+			normal_bg,
+			config.line_opacity.command + statusbar_offset
+		),
+		replace = utils.blend(
+			colors.replace,
+			normal_bg,
+			config.line_opacity.replace + statusbar_offset
+		),
+		history = utils.blend(
+			colors.history,
+			normal_bg,
+			config.line_opacity.history + statusbar_offset
+		),
+	}
+
 	---Create highlight groups
 	vim.cmd('hi ModesNormal guibg=' .. colors.normal)
 	vim.cmd('hi ModesCopy guibg=' .. colors.copy)
@@ -232,8 +302,9 @@ M.define = function()
 		'History',
 	}) do
 		local def =
-			{ fg = colors[mode:lower()], bg = blended_colors[mode:lower()] }
-		local bg_def = { bg = blended_colors[mode:lower()] }
+			{ fg = colors[mode:lower()], bg = shaded_colors[mode:lower()] }
+		local fg_def = { fg = colors.text, bg = colors[mode:lower()] }
+		local bg_def = { bg = shaded_colors[mode:lower()] }
 		utils.set_hl(('Modes%sCursorLine'):format(mode), bg_def)
 		utils.set_hl(('Modes%sCursorLineNr'):format(mode), def)
 		utils.set_hl(('Modes%sCursorLineSign'):format(mode), bg_def)
@@ -242,7 +313,7 @@ M.define = function()
 
 	utils.set_hl('ModesInsertModeMsg', { fg = colors.insert })
 	utils.set_hl('ModesVisualModeMsg', { fg = colors.visual })
-	utils.set_hl('ModesVisualVisual', { bg = blended_colors.visual })
+	utils.set_hl('ModesVisualVisual', { bg = shaded_colors.visual })
 
 	if config.set_yanked_background then
 		vim.api.nvim_create_autocmd('TextYankPost', {
@@ -251,7 +322,7 @@ M.define = function()
 			desc = 'Highlight yanked text',
 		})
 
-		utils.set_hl('TextYanked', { bg = blended_colors.copy })
+		utils.set_hl('TextYanked', { bg = shaded_colors.copy })
 	end
 end
 
