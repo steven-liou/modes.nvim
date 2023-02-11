@@ -164,6 +164,7 @@ M.highlight = function(scene_event)
 			{ fg = colors.white_text, bg = shaded_colors[scene_name] }
 		local statusbar_def =
 			{ fg = colors[scene_event], bg = statusbar_colors[scene_name] }
+
 		if
 			scene_event == 'copy'
 			or scene_event == 'delete'
@@ -177,6 +178,38 @@ M.highlight = function(scene_event)
 		utils.set_hl(('lualine_b_%s'):format(scene_event), statusbar_def)
 		utils.set_hl(('lualine_c_%s'):format(scene_event), bg_def)
 		utils.set_hl(('lualine_y_%s'):format(scene_event), statusbar_def)
+		utils.set_hl(
+			('lualine_y_file_type_DevIconLua_%s'):format(scene_event),
+			statusbar_def
+		)
+		utils.set_hl(
+			('lualine_x_diagnostics_error'):format(scene_event),
+			{ fg = colors.delete, bg = shaded_colors[scene_name] }
+		)
+		utils.set_hl(
+			('lualine_x_diagnostics_warn'):format(scene_event),
+			{ fg = colors.command, bg = shaded_colors[scene_name] }
+		)
+		utils.set_hl(
+			('lualine_x_diagnostics_hint'):format(scene_event),
+			{ fg = colors.pending, bg = shaded_colors[scene_name] }
+		)
+		utils.set_hl(
+			('lualine_x_diagnostics_info'):format(scene_event),
+			{ fg = colors.insert, bg = shaded_colors[scene_name] }
+		)
+		utils.set_hl(
+			('lualine_x_diff_added'):format(scene_event),
+			{ fg = colors.pending, bg = shaded_colors[scene_name] }
+		)
+		utils.set_hl(
+			('lualine_x_diff_modified'):format(scene_event),
+			{ fg = colors.command, bg = shaded_colors[scene_name] }
+		)
+		utils.set_hl(
+			('lualine_x_diff_removed'):format(scene_event),
+			{ fg = colors.delete, bg = shaded_colors[scene_name] }
+		)
 	end
 end
 
