@@ -1,6 +1,7 @@
 local utils = require('modes.utils')
 local lualine = require('modes.lualine')
 local aerial = require('modes.aerial')
+local bufferline = require('modes.bufferline')
 local reset_delay = 500
 local reset_timer = nil
 
@@ -158,6 +159,7 @@ M.highlight = function(scene_event)
 
 	lualine.highlight(config, scene_event, scene_name)
 	aerial.highlight(config, scene_event, scene_name)
+	bufferline.highlight(config, scene_name)
 end
 
 M.define = function()

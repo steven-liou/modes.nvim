@@ -4,8 +4,11 @@ local lsp_kinds = require('modes.lsp_kinds')
 local M = {}
 
 M.define = function(config)
-	statusbar_middle_colors =
-		utils.define_lualine_colors(config, 'statusbar_middle_opacity')
+	statusbar_middle_colors = utils.define_component_opacity(
+		config,
+		'lualine',
+		'statusbar_middle_opacity'
+	)
 end
 
 M.highlight = function(config, scene_event, scene_name)

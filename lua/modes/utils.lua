@@ -49,6 +49,7 @@ end
 ---@param name string
 ---@param color Color
 M.set_hl = function(name, color)
+	name = name:gsub('-', '_')
 	if color.link ~= nil then
 		vim.cmd('hi ' .. name .. ' guibg=none guifg=none')
 		vim.cmd('hi! link ' .. name .. ' ' .. color.link)
@@ -59,9 +60,18 @@ M.set_hl = function(name, color)
 	local fg = color.fg or 'none'
 	local gui = color.gui or 'none'
 
-	vim.cmd(
-		'hi ' .. name .. ' guibg=' .. bg .. ' guifg=' .. fg .. ' gui=' .. gui
-	)
+	local cmd = 'hi '
+		.. name
+		.. ' guibg='
+		.. bg
+		.. ' guifg='
+		.. fg
+		.. ' gui='
+		.. gui
+	-- if vim.bo.filetype == 'neo-tree' then
+	-- 	print(cmd)
+	-- end
+	vim.cmd(cmd)
 end
 
 M.get_fg = function(name, fallback)
@@ -124,57 +134,74 @@ M.print_table = function(table)
 	end
 end
 
-M.define_lualine_colors = function(config, opacity_name)
+M.define_component_opacity = function(config, bar_name, opacity_name)
 	local normal_bg = M.get_bg('Normal', 'Normal')
 	local colors = config.colors
-	M.set_opacity(config.lualine, opacity_name)
+	M.set_opacity(config[bar_name], opacity_name)
 	return {
 		normal = M.blend(
 			colors.normal,
 			normal_bg,
-			config.lualine[opacity_name].normal
+			config[bar_name][opacity_name].normal
 		),
 		copy = M.blend(
 			colors.copy,
 			normal_bg,
-			config.lualine[opacity_name].copy
+			config[bar_name][opacity_name].copy
 		),
 		delete = M.blend(
 			colors.delete,
 			normal_bg,
-			config.lualine[opacity_name].delete
+			config[bar_name][opacity_name].delete
 		),
 		insert = M.blend(
 			colors.insert,
 			normal_bg,
-			config.lualine[opacity_name].insert
+			config[bar_name][opacity_name].insert
 		),
 		visual = M.blend(
 			colors.visual,
 			normal_bg,
-			config.lualine[opacity_name].visual
+			config[bar_name][opacity_name].visual
 		),
 		pending = M.blend(
 			colors.pending,
 			normal_bg,
-			config.lualine[opacity_name].pending
+			config[bar_name][opacity_name].pending
 		),
 		command = M.blend(
 			colors.command,
 			normal_bg,
-			config.lualine[opacity_name].command
+			config[bar_name][opacity_name].command
 		),
 		replace = M.blend(
 			colors.replace,
 			normal_bg,
-			config.lualine[opacity_name].replace
+			config[bar_name][opacity_name].replace
 		),
 		history = M.blend(
 			colors.history,
 			normal_bg,
-			config.lualine[opacity_name].history
+			config[bar_name][opacity_name].history
 		),
 	}
+end
+
+M.get_highlight_colors_by_name = function(name)
+	local ok, colors = pcall(vim.api.nvim_get_hl_by_name, name, true)
+
+	local hex_colors = {
+		foreground = nil,
+		background = nil,
+	}
+
+	for key, val in pairs(colors) do
+		if type(val) == 'number' then
+			hex_colors[key] = '#' .. string.format('%06x', val)
+		end
+	end
+
+	return ok, hex_colors
 end
 
 return M

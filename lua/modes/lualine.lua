@@ -5,10 +5,69 @@ local statusbar_middle_colors = {}
 local M = {}
 
 M.define = function(config)
-	statusbar_middle_colors =
-		utils.define_lualine_colors(config, 'statusbar_middle_opacity')
-	statusbar_side_colors =
-		utils.define_lualine_colors(config, 'statusbar_side_opacity')
+	statusbar_middle_colors = utils.define_component_opacity(
+		config,
+		'lualine',
+		'statusbar_middle_opacity'
+	)
+	statusbar_side_colors = utils.define_component_opacity(
+		config,
+		'lualine',
+		'statusbar_side_opacity'
+	)
+end
+
+local function set_filetype_component_highlight(
+	lualine,
+	scene_event,
+	scene_name
+)
+	local ft = vim.bo.filetype
+
+	ft = utils.titlecase(ft)
+	local filetype_highlight_name = ('lualine_%s_filetype_DevIcon%s_%s'):format(
+		lualine.filetype_component,
+		ft,
+		scene_event
+	)
+	local _, icon_color =
+		devicons.get_icon_color(vim.fn.expand('%:t'), vim.bo.filetype)
+
+	utils.set_hl(filetype_highlight_name, {
+		fg = icon_color,
+		bg = statusbar_side_colors[scene_name],
+	})
+end
+
+local function set_diagnostics_component_highlight(lualine, colors, scene_name)
+	utils.set_hl(
+		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_error',
+		{ fg = colors.delete, bg = statusbar_middle_colors[scene_name] }
+	)
+	utils.set_hl(
+		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_warn',
+		{ fg = colors.command, bg = statusbar_middle_colors[scene_name] }
+	)
+	utils.set_hl(
+		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_hint',
+		{ fg = colors.pending, bg = statusbar_middle_colors[scene_name] }
+	)
+	utils.set_hl(
+		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_info',
+		{ fg = colors.insert, bg = statusbar_middle_colors[scene_name] }
+	)
+	utils.set_hl(
+		'lualine_' .. lualine.diff_component .. '_diff_added',
+		{ fg = colors.pending, bg = statusbar_middle_colors[scene_name] }
+	)
+	utils.set_hl(
+		'lualine_' .. lualine.diff_component .. '_diff_modified',
+		{ fg = colors.command, bg = statusbar_middle_colors[scene_name] }
+	)
+	utils.set_hl(
+		'lualine_' .. lualine.diff_component .. '_diff_removed',
+		{ fg = colors.delete, bg = statusbar_middle_colors[scene_name] }
+	)
 end
 
 M.highlight = function(config, scene_event, scene_name)
@@ -41,48 +100,8 @@ M.highlight = function(config, scene_event, scene_name)
 	utils.set_hl(('lualine_x_%s'):format(scene_event), statusbar_def)
 	utils.set_hl(('lualine_y_%s'):format(scene_event), statusbar_def)
 
-	local ft = utils.titlecase(vim.bo.filetype)
-	local filetype_highlight_name = ('lualine_%s_filetype_DevIcon%s_%s'):format(
-		lualine.filetype_component,
-		ft,
-		scene_event
-	)
-	local _, icon_color =
-		devicons.get_icon_color(vim.fn.expand('%:t'), vim.bo.filetype)
-
-	utils.set_hl(filetype_highlight_name, {
-		fg = icon_color,
-		bg = statusbar_side_colors[scene_name],
-	})
-
-	utils.set_hl(
-		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_error',
-		{ fg = colors.delete, bg = statusbar_middle_colors[scene_name] }
-	)
-	utils.set_hl(
-		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_warn',
-		{ fg = colors.command, bg = statusbar_middle_colors[scene_name] }
-	)
-	utils.set_hl(
-		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_hint',
-		{ fg = colors.pending, bg = statusbar_middle_colors[scene_name] }
-	)
-	utils.set_hl(
-		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_info',
-		{ fg = colors.insert, bg = statusbar_middle_colors[scene_name] }
-	)
-	utils.set_hl(
-		'lualine_' .. lualine.diff_component .. '_diff_added',
-		{ fg = colors.pending, bg = statusbar_middle_colors[scene_name] }
-	)
-	utils.set_hl(
-		'lualine_' .. lualine.diff_component .. '_diff_modified',
-		{ fg = colors.command, bg = statusbar_middle_colors[scene_name] }
-	)
-	utils.set_hl(
-		'lualine_' .. lualine.diff_component .. '_diff_removed',
-		{ fg = colors.delete, bg = statusbar_middle_colors[scene_name] }
-	)
+	set_filetype_component_highlight(lualine, scene_event, scene_name)
+	set_diagnostics_component_highlight(lualine, colors, scene_name)
 end
 
 return M

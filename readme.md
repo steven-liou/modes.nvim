@@ -82,6 +82,10 @@ require("modes").setup({
 		aerial_component = "c",
 	},
 
+    -- Highlight bufferline.nvim
+	bufferline = {
+		enabled = true,
+	},
 
 	-- Highlight cursor
 	set_cursor = true,
