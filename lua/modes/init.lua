@@ -74,11 +74,17 @@ local winhighlight = {
 		CursorLineSign = 'ModesPendingCursorLineSign',
 		CursorLineFold = 'ModesPendingCursorLineFold',
 	},
-	history = {
-		CursorLine = 'ModesHistoryCursorLine',
-		CursorLineNr = 'ModesHistoryCursorLineNr',
-		CursorLineSign = 'ModesHistoryCursorLineSign',
-		CursorLineFold = 'ModesHistoryCursorLineFold',
+	undo = {
+		CursorLine = 'ModesUndoCursorLine',
+		CursorLineNr = 'ModesUndoCursorLineNr',
+		CursorLineSign = 'ModesUndoCursorLineSign',
+		CursorLineFold = 'ModesUndoCursorLineFold',
+	},
+	redo = {
+		CursorLine = 'ModesRedoCursorLine',
+		CursorLineNr = 'ModesRedoCursorLineNr',
+		CursorLineSign = 'ModesRedoCursorLineSign',
+		CursorLineFold = 'ModesRedoCursorLineFold',
 	},
 }
 local colors = {}
@@ -95,7 +101,7 @@ M.reset = function()
 end
 
 ---Update highlights
----@param scene_event 'normal'|'insert'|'change'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'char_replace' | 'pending' | 'history'
+---@param scene_event 'normal'|'insert'|'change'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'char_replace' | 'pending' | 'undo'
 M.highlight = function(scene_event)
 	if in_ignored_buffer() then
 		return
@@ -152,8 +158,10 @@ M.highlight = function(scene_event)
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesCopy' })
 		elseif scene_event == 'pending' then
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesPending' })
-		elseif scene_event == 'history' then
-			utils.set_hl('ModesNormalCursor', { link = 'ModesHistory' })
+		elseif scene_event == 'undo' then
+			utils.set_hl('ModesNormalCursor', { link = 'ModesUndo' })
+		elseif scene_event == 'redo' then
+			utils.set_hl('ModesNormalCursor', { link = 'ModesRedo' })
 		end
 	end
 
@@ -178,8 +186,8 @@ M.define = function()
 			or utils.get_bg('ModesCommand', '#deb974'),
 		replace = config.colors.replace
 			or utils.get_bg('ModesReplace', '#e3a5a5'),
-		history = config.colors.history
-			or utils.get_bg('ModesHistory', '#9745be'),
+		undo = config.colors.history or utils.get_bg('ModesUndo', '#9745be'),
+		redo = config.colors.history or utils.get_bg('ModesRedo', '#9745be'),
 	}
 
 	config.colors = colors
@@ -187,16 +195,6 @@ M.define = function()
 	config.shaded_colors = shaded_colors
 
 	---Create highlight groups
-	vim.cmd('hi ModesNormal guibg=' .. colors.normal)
-	vim.cmd('hi ModesCopy guibg=' .. colors.copy)
-	vim.cmd('hi ModesDelete guibg=' .. colors.delete)
-	vim.cmd('hi ModesInsert guibg=' .. colors.insert)
-	vim.cmd('hi ModesVisual guibg=' .. colors.visual)
-	vim.cmd('hi ModesPending guibg=' .. colors.pending)
-	vim.cmd('hi ModesCommand guibg=' .. colors.command)
-	vim.cmd('hi ModesReplace guibg=' .. colors.replace)
-	vim.cmd('hi ModesHistory guibg=' .. colors.history)
-
 	for _, mode in ipairs({
 		'Normal',
 		'Copy',
@@ -206,16 +204,20 @@ M.define = function()
 		'Pending',
 		'Command',
 		'Replace',
-		'History',
+		'Undo',
+		'Redo',
 	}) do
 		local def =
 			{ fg = colors[mode:lower()], bg = shaded_colors[mode:lower()] }
-		local fg_def = { fg = colors.text, bg = colors[mode:lower()] }
-		local bg_def = { bg = shaded_colors[mode:lower()] }
-		utils.set_hl(('Modes%sCursorLine'):format(mode), bg_def)
+		local bg_def = { bg = colors[mode:lower()] }
+		local bg_shade_def = { bg = shaded_colors[mode:lower()] }
+		local mode_highlight_name = ('Modes%s'):format(mode)
+		utils.set_hl(mode_highlight_name, bg_def)
+
+		utils.set_hl(('Modes%sCursorLine'):format(mode), bg_shade_def)
 		utils.set_hl(('Modes%sCursorLineNr'):format(mode), def)
-		utils.set_hl(('Modes%sCursorLineSign'):format(mode), bg_def)
-		utils.set_hl(('Modes%sCursorLineFold'):format(mode), bg_def)
+		utils.set_hl(('Modes%sCursorLineSign'):format(mode), bg_shade_def)
+		utils.set_hl(('Modes%sCursorLineFold'):format(mode), bg_shade_def)
 	end
 
 	utils.set_hl('ModesInsertModeMsg', { fg = colors.insert })
@@ -440,12 +442,12 @@ M.setup = function(opts)
 		end,
 	})
 
-	---Set history highlight
+	---Set undo highlight
 	vim.api.nvim_create_autocmd('TextChanged', {
 		pattern = '*',
 		callback = function()
 			if last_key_pressed == 'u' or last_key_pressed == '' then
-				M.highlight('history')
+				M.highlight('undo')
 			end
 			delay_oprator_reset()
 		end,

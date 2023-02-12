@@ -37,7 +37,7 @@ require("modes").setup({
 		pending = "#4ec9b0",
 		copy = "#f5c359",
 		delete = "#c75c6a"
-		history = "#9745be",
+		undo = "#9745be",
 	},
 
 	-- Cursorline highlight opacity
@@ -50,7 +50,7 @@ require("modes").setup({
 		pending = 0.1,
 		copy = 0.1,
 		delete = 0.1,
-		history = 0.1,
+		undo = 0.1,
 	},
 	-- Highlight lualine
 	lualine = {
@@ -64,7 +64,7 @@ require("modes").setup({
 			command = 0.17,
 			replace = 0.15,
 			pending = 0.15,
-			history = 0.15,
+			undo = 0.15,
 		},
 		statusbar_middle_opacity = {
 			normal = 0.08,
@@ -75,7 +75,7 @@ require("modes").setup({
 			command = 0.12,
 			replace = 0.12,
 			pending = 0.12,
-			history = 0.12,
+			undo = 0.12,
 		},
 		diff_component = "x",
 		diagnostics_component = "x",
@@ -97,7 +97,7 @@ require("modes").setup({
 			command = 0.1,
 			replace = 0.08,
 			pending = 0.09,
-			history = 0.08,
+			undo = 0.08,
 		},
 	},
 
@@ -132,7 +132,7 @@ vim.cmd('hi ModesCommand guibg=#deb974')
 vim.cmd('hi ModesPending guibg=#78ccc5')
 vim.cmd('hi ModesCopy guibg=#f5c359')
 vim.cmd('hi ModesDelete guibg=#c75c6a')
-vim.cmd('hi ModesHistory guibg=#9745be')
+vim.cmd('hi ModesUndo guibg=#9745be')
 ```
 
 ## Known issues

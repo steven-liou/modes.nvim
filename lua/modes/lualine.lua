@@ -90,7 +90,7 @@ M.highlight = function(config, scene_event, scene_name)
 		or scene_event == 'delete'
 		or scene_event == 'pending'
 		or scene_event == 'char_replace'
-		or scene_event == 'history'
+		or scene_event == 'undo'
 		or scene_event == 'change'
 	then
 		scene_event = 'normal'
