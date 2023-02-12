@@ -230,6 +230,7 @@ M.define = function()
 	config.shaded_colors = shaded_colors
 	lualine.define(config)
 	aerial.define(config)
+	bufferline.define(config)
 
 	---Create highlight groups
 	vim.cmd('hi ModesNormal guibg=' .. colors.normal)

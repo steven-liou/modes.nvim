@@ -85,6 +85,19 @@ require("modes").setup({
     -- Highlight bufferline.nvim
 	bufferline = {
 		enabled = true,
+		background_color = colors.shade_black,
+		fill_color = colors.black,
+		opacity = {
+			normal = 0.08,
+			copy = 0.08,
+			delete = 0.1,
+			insert = 0.06,
+			visual = 0.1,
+			command = 0.1,
+			replace = 0.08,
+			pending = 0.09,
+			history = 0.08,
+		},
 	},
 
 	-- Highlight cursor
