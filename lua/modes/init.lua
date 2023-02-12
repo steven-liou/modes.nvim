@@ -143,14 +143,16 @@ M.highlight = function(scene_event)
 			utils.set_hl('ModesNormalCursor', { link = 'ModesNormal' })
 		elseif scene_event == 'delete' then
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesDelete' })
+			utils.set_hl('ModesNormalCursor', { link = 'ModesDelete' })
 		elseif scene_event == 'insert_change' then
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesInsert' })
 		elseif scene_event == 'copy' then
+			utils.set_hl('ModesNormalCursor', { link = 'ModesCopy' })
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesCopy' })
 		elseif scene_event == 'pending' then
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesPending' })
 		elseif scene_event == 'history' then
-			utils.set_hl('ModesOperatorCursor', { link = 'ModesHistory' })
+			utils.set_hl('ModesNormalCursor', { link = 'ModesHistory' })
 		end
 	end
 
