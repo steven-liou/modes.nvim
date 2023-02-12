@@ -1,5 +1,4 @@
 local utils = require('modes.utils')
-local devicons = require('nvim-web-devicons')
 local statusbar_side_colors = {}
 local statusbar_middle_colors = {}
 local M = {}
@@ -30,13 +29,15 @@ local function set_filetype_component_highlight(
 		ft,
 		scene_event
 	)
-	local _, icon_color =
-		devicons.get_icon_color(vim.fn.expand('%:t'), vim.bo.filetype)
+	local icon_color =
+		utils.get_highlight_colors_by_name(filetype_highlight_name)
 
-	utils.set_hl(filetype_highlight_name, {
-		fg = icon_color,
-		bg = statusbar_side_colors[scene_name],
-	})
+	if icon_color then
+		utils.set_hl(filetype_highlight_name, {
+			fg = icon_color.foreground,
+			bg = statusbar_side_colors[scene_name],
+		})
+	end
 end
 
 local function set_diagnostics_component_highlight(lualine, colors, scene_name)

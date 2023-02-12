@@ -189,6 +189,9 @@ end
 
 M.get_highlight_colors_by_name = function(name)
 	local ok, colors = pcall(vim.api.nvim_get_hl_by_name, name, true)
+	if not ok then
+		return nil
+	end
 
 	local hex_colors = {
 		foreground = nil,
@@ -201,7 +204,7 @@ M.get_highlight_colors_by_name = function(name)
 		end
 	end
 
-	return ok, hex_colors
+	return hex_colors
 end
 
 return M

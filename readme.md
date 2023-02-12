@@ -9,7 +9,6 @@ Highlight UI elements based on current mode. Inspired by the recent addition of 
 ```lua
 use({
   'steven-liou/modes.nvim',
-  dependencies = { "kyazdani42/nvim-web-devicons" },
   config = function()
     vim.opt.cursorline = true
     require('modes').setup()

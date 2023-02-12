@@ -1,5 +1,4 @@
 local utils = require('modes.utils')
-local devicons = require('nvim-web-devicons')
 local color_opacity = {}
 local M = {}
 
@@ -24,12 +23,16 @@ local function set_devicon_component_highlight(scene_name)
 
 	ft = utils.titlecase(ft)
 	local filetype_highlight_name = ('BufferLineDevIcon%sSelected'):format(ft)
-	local _, icon_color =
-		devicons.get_icon_color(vim.fn.expand('%:t'), vim.bo.filetype)
-	utils.set_hl(filetype_highlight_name, {
-		fg = icon_color,
-		bg = color_opacity[scene_name],
-	})
+
+	local icon_color =
+		utils.get_highlight_colors_by_name(filetype_highlight_name)
+
+	if icon_color then
+		utils.set_hl(filetype_highlight_name, {
+			fg = icon_color.foreground,
+			bg = color_opacity[scene_name],
+		})
+	end
 end
 
 M.highlight = function(config, scene_name)
@@ -40,11 +43,10 @@ M.highlight = function(config, scene_name)
 	local colors = config.colors
 
 	for _, name in ipairs(bufferline_foreground_groups) do
-		local ok, highlight_colors = utils.get_highlight_colors_by_name(name)
-		local bg_color = highlight_colors.background
-			or config.bufferline.background_color
-
-		if ok then
+		local highlight_colors = utils.get_highlight_colors_by_name(name)
+		if highlight_colors then
+			local bg_color = highlight_colors.background
+				or config.bufferline.background_color
 			local fg_def = {
 				fg = colors[scene_name],
 				bg = color_opacity[scene_name],
