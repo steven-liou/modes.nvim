@@ -182,55 +182,9 @@ M.define = function()
 			or utils.get_bg('ModesHistory', '#9745be'),
 	}
 
-	shaded_colors = {
-		normal = utils.blend(
-			colors.normal,
-			normal_bg,
-			config.line_opacity.normal
-		),
-		copy = utils.blend(colors.copy, normal_bg, config.line_opacity.copy),
-		delete = utils.blend(
-			colors.delete,
-			normal_bg,
-			config.line_opacity.delete
-		),
-		insert = utils.blend(
-			colors.insert,
-			normal_bg,
-			config.line_opacity.insert
-		),
-		visual = utils.blend(
-			colors.visual,
-			normal_bg,
-			config.line_opacity.visual
-		),
-		pending = utils.blend(
-			colors.pending,
-			normal_bg,
-			config.line_opacity.pending
-		),
-		command = utils.blend(
-			colors.command,
-			normal_bg,
-			config.line_opacity.command
-		),
-		replace = utils.blend(
-			colors.replace,
-			normal_bg,
-			config.line_opacity.replace
-		),
-		history = utils.blend(
-			colors.history,
-			normal_bg,
-			config.line_opacity.history
-		),
-	}
-
 	config.colors = colors
+	shaded_colors = utils.define_component_opacity(config, 'line_opacity')
 	config.shaded_colors = shaded_colors
-	lualine.define(config)
-	aerial.define(config)
-	bufferline.define(config)
 
 	---Create highlight groups
 	vim.cmd('hi ModesNormal guibg=' .. colors.normal)
@@ -277,6 +231,10 @@ M.define = function()
 
 		utils.set_hl('TextYanked', { bg = shaded_colors.copy })
 	end
+
+	lualine.define(config)
+	aerial.define(config)
+	bufferline.define(config)
 end
 
 local group = vim.api.nvim_create_augroup('NvimModesCursor', { clear = true })
@@ -371,8 +329,6 @@ M.setup = function(opts)
 	end
 
 	config = vim.tbl_deep_extend('force', default_config, opts)
-
-	utils.set_opacity(config, 'line_opacity')
 
 	M.define()
 

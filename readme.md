@@ -27,6 +27,8 @@ Default colors can be overridden by passing values to the setup function or upda
 ```lua
 require("modes").setup({
 	colors = {
+        black_text = "#1e1e1e",
+        white_text = "#d4d4d4",
 		normal = "#608b4e",
 		insert = "#569cd6",
 		visual = "#c586c0",

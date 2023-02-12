@@ -26,6 +26,9 @@ end
 ---@param alpha integer number between 0 and 1
 ---@return string
 M.blend = function(fg, bg, alpha)
+	if fg == nil or bg == nil then
+		return nil
+	end
 	local bg_color = get_color(bg)
 	local fg_color = get_color(fg)
 
@@ -68,9 +71,6 @@ M.set_hl = function(name, color)
 		.. fg
 		.. ' gui='
 		.. gui
-	-- if vim.bo.filetype == 'neo-tree' then
-	-- 	print(cmd)
-	-- end
 	vim.cmd(cmd)
 end
 
@@ -113,13 +113,13 @@ function M.get_termcode(key)
 	return vim.api.nvim_replace_termcodes(key, true, true, true)
 end
 
-M.set_opacity = function(table, field, default_value)
+M.set_opacity = function(table, default_value)
 	default_value = default_value or 0.05
-	for key, val in pairs(table[field]) do
+	for key, val in pairs(table) do
 		if type(val) == 'number' then
-			table[field][key] = val
+			table[key] = val
 		else
-			table[field][key] = default_value
+			table[key] = default_value
 		end
 	end
 end
@@ -134,57 +134,23 @@ M.print_table = function(table)
 	end
 end
 
-M.define_component_opacity = function(config, bar_name, opacity_name)
+M.define_component_opacity = function(config, level1, level2)
 	local normal_bg = M.get_bg('Normal', 'Normal')
 	local colors = config.colors
-	M.set_opacity(config[bar_name], opacity_name)
-	return {
-		normal = M.blend(
-			colors.normal,
-			normal_bg,
-			config[bar_name][opacity_name].normal
-		),
-		copy = M.blend(
-			colors.copy,
-			normal_bg,
-			config[bar_name][opacity_name].copy
-		),
-		delete = M.blend(
-			colors.delete,
-			normal_bg,
-			config[bar_name][opacity_name].delete
-		),
-		insert = M.blend(
-			colors.insert,
-			normal_bg,
-			config[bar_name][opacity_name].insert
-		),
-		visual = M.blend(
-			colors.visual,
-			normal_bg,
-			config[bar_name][opacity_name].visual
-		),
-		pending = M.blend(
-			colors.pending,
-			normal_bg,
-			config[bar_name][opacity_name].pending
-		),
-		command = M.blend(
-			colors.command,
-			normal_bg,
-			config[bar_name][opacity_name].command
-		),
-		replace = M.blend(
-			colors.replace,
-			normal_bg,
-			config[bar_name][opacity_name].replace
-		),
-		history = M.blend(
-			colors.history,
-			normal_bg,
-			config[bar_name][opacity_name].history
-		),
-	}
+	local settings = nil
+
+	if level2 then
+		settings = config[level1][level2]
+	else
+		settings = config[level1]
+	end
+	M.set_opacity(settings)
+
+	local opacity = {}
+	for key, _ in pairs(settings) do
+		opacity[key] = M.blend(colors[key], normal_bg, settings[key])
+	end
+	return opacity
 end
 
 M.get_highlight_colors_by_name = function(name)
