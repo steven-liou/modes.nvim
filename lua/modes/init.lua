@@ -101,7 +101,7 @@ M.reset = function()
 end
 
 ---Update highlights
----@param scene_event 'normal'|'insert'|'change'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'char_replace' | 'pending' | 'undo'
+---@param scene_event 'normal'|'insert'|'change'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'char_replace' | 'pending' | 'undo' | 'redo'
 M.highlight = function(scene_event)
 	if in_ignored_buffer() then
 		return
@@ -171,7 +171,6 @@ M.highlight = function(scene_event)
 end
 
 M.define = function()
-	local normal_bg = utils.get_bg('Normal', 'Normal')
 	colors = {
 		black_text = config.colors.text or '#1e1e1e',
 		white_text = config.colors.white_text or '#d4d4d4',
@@ -186,8 +185,8 @@ M.define = function()
 			or utils.get_bg('ModesCommand', '#deb974'),
 		replace = config.colors.replace
 			or utils.get_bg('ModesReplace', '#e3a5a5'),
-		undo = config.colors.history or utils.get_bg('ModesUndo', '#9745be'),
-		redo = config.colors.history or utils.get_bg('ModesRedo', '#9745be'),
+		undo = config.colors.undo or utils.get_bg('ModesUndo', '#9745be'),
+		redo = config.colors.redo or utils.get_bg('ModesRedo', '#9745be'),
 	}
 
 	config.colors = colors
@@ -442,12 +441,14 @@ M.setup = function(opts)
 		end,
 	})
 
-	---Set undo highlight
+	---Set undo/redo highlights
 	vim.api.nvim_create_autocmd('TextChanged', {
 		pattern = '*',
 		callback = function()
-			if last_key_pressed == 'u' or last_key_pressed == '' then
+			if last_key_pressed == 'u' then
 				M.highlight('undo')
+			elseif last_key_pressed == '' then
+				M.highlight('redo')
 			end
 			delay_oprator_reset()
 		end,
