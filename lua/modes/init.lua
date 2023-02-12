@@ -95,7 +95,7 @@ M.reset = function()
 end
 
 ---Update highlights
----@param scene_event 'normal'|'insert'|'insert_change'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'char_replace' | 'pending' | 'history'
+---@param scene_event 'normal'|'insert'|'change'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'char_replace' | 'pending' | 'history'
 M.highlight = function(scene_event)
 	if in_ignored_buffer() then
 		return
@@ -116,7 +116,7 @@ M.highlight = function(scene_event)
 	local scene_name = scene_event
 	if scene_event == 'char_replace' then
 		scene_name = 'replace'
-	elseif scene_event == 'insert_change' then
+	elseif scene_event == 'change' then
 		scene_name = 'insert'
 	end
 
@@ -145,7 +145,7 @@ M.highlight = function(scene_event)
 		elseif scene_event == 'delete' then
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesDelete' })
 			utils.set_hl('ModesNormalCursor', { link = 'ModesDelete' })
-		elseif scene_event == 'insert_change' then
+		elseif scene_event == 'change' then
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesInsert' })
 		elseif scene_event == 'copy' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesCopy' })
@@ -355,7 +355,7 @@ M.setup = function(opts)
 			end
 
 			if key == 'c' then
-				M.highlight('insert_change')
+				M.highlight('change')
 				operator_started = true
 				delay_oprator_reset()
 				return

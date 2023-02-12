@@ -91,14 +91,14 @@ M.highlight = function(config, scene_event, scene_name)
 		or scene_event == 'pending'
 		or scene_event == 'char_replace'
 		or scene_event == 'history'
-		or scene_event == 'insert_change'
+		or scene_event == 'change'
 	then
 		scene_event = 'normal'
 	end
 	utils.set_hl(('lualine_a_%s'):format(scene_event), fg_def)
 	utils.set_hl(('lualine_b_%s'):format(scene_event), statusbar_def)
 	utils.set_hl(('lualine_c_%s'):format(scene_event), bg_def)
-	utils.set_hl(('lualine_x_%s'):format(scene_event), statusbar_def)
+	utils.set_hl(('lualine_x_%s'):format(scene_event), bg_def)
 	utils.set_hl(('lualine_y_%s'):format(scene_event), statusbar_def)
 
 	set_filetype_component_highlight(lualine, scene_event, scene_name)
