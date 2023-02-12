@@ -1,33 +1,6 @@
 local utils = require('modes.utils')
 local statusbar_middle_colors = {}
-local lsp_kinds = {
-	'File',
-	'Module',
-	'Namespace',
-	'Package',
-	'Class',
-	'Method',
-	'Property',
-	'Field',
-	'Constructor',
-	'Enum',
-	'Interface',
-	'Function',
-	'Variable',
-	'Constant',
-	'String',
-	'Number',
-	'Boolean',
-	'Array',
-	'Object',
-	'Key',
-	'Null',
-	'Enum',
-	'Struct',
-	'Event',
-	'Operator',
-	'Type',
-}
+local lsp_kinds = require('modes.lsp_kinds')
 local M = {}
 
 M.define = function(config)

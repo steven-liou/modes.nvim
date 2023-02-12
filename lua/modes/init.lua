@@ -94,7 +94,7 @@ M.reset = function()
 end
 
 ---Update highlights
----@param scene_event 'normal'|'insert'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'char_replace' | 'pending' | 'history'
+---@param scene_event 'normal'|'insert'|'insert_change'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'char_replace' | 'pending' | 'history'
 M.highlight = function(scene_event)
 	if in_ignored_buffer() then
 		return
@@ -113,8 +113,10 @@ M.highlight = function(scene_event)
 
 	-- map keymap events to actual scene names
 	local scene_name = scene_event
-	if scene_name == 'char_replace' then
+	if scene_event == 'char_replace' then
 		scene_name = 'replace'
+	elseif scene_event == 'insert_change' then
+		scene_name = 'insert'
 	end
 
 	-- overrides 'builtin':'hl' if the current scene has a mapping for it
@@ -140,21 +142,15 @@ M.highlight = function(scene_event)
 		if scene_event == 'normal' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesNormal' })
 		elseif scene_event == 'delete' then
-			utils.set_hl('ModesNormalCursor', { link = 'ModesDelete' })
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesDelete' })
-		elseif scene_event == 'insert' then
+		elseif scene_event == 'insert_change' then
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesInsert' })
 		elseif scene_event == 'copy' then
-			utils.set_hl('ModesNormalCursor', { link = 'ModesCopy' })
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesCopy' })
 		elseif scene_event == 'pending' then
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesPending' })
-			utils.set_hl('ModesNormalCursor', { link = 'ModesPending' })
 		elseif scene_event == 'history' then
-			utils.set_hl('ModesNormalCursor', { link = 'ModesHistory' })
-		elseif scene_event == 'char_replace' then
-			utils.set_hl('ModesNormalCursor', { link = 'ModesCopy' })
-			utils.set_hl('ModesOperatorCursor', { link = 'ModesCopy' })
+			utils.set_hl('ModesOperatorCursor', { link = 'ModesHistory' })
 		end
 	end
 
@@ -398,7 +394,7 @@ M.setup = function(opts)
 			end
 
 			if key == 'c' then
-				M.highlight('insert')
+				M.highlight('insert_change')
 				operator_started = true
 				delay_oprator_reset()
 				return

@@ -1,4 +1,5 @@
 local utils = require('modes.utils')
+local devicons = require('nvim-web-devicons')
 local statusbar_side_colors = {}
 local statusbar_middle_colors = {}
 local M = {}
@@ -30,6 +31,7 @@ M.highlight = function(config, scene_event, scene_name)
 		or scene_event == 'pending'
 		or scene_event == 'char_replace'
 		or scene_event == 'history'
+		or scene_event == 'insert_change'
 	then
 		scene_event = 'normal'
 	end
@@ -40,21 +42,18 @@ M.highlight = function(config, scene_event, scene_name)
 	utils.set_hl(('lualine_y_%s'):format(scene_event), statusbar_def)
 
 	local ft = utils.titlecase(vim.bo.filetype)
-	local filetype_highlight_name = (
-		'lualine_'
-		.. lualine.filetype_component
-		.. '_filetype_DevIcon%s_%s'
-	):format(ft, scene_event)
-	local ok, ft_colors =
-		pcall(vim.api.nvim_get_hl_by_name, filetype_highlight_name, true)
+	local filetype_highlight_name = ('lualine_%s_filetype_DevIcon%s_%s'):format(
+		lualine.filetype_component,
+		ft,
+		scene_event
+	)
+	local _, icon_color =
+		devicons.get_icon_color(vim.fn.expand('%:t'), vim.bo.filetype)
 
-	if ok and ft_colors.foreground then
-		local fg_color = '#' .. string.format('%06x', ft_colors.foreground)
-		utils.set_hl(filetype_highlight_name, {
-			fg = fg_color,
-			bg = statusbar_middle_colors[scene_name],
-		})
-	end
+	utils.set_hl(filetype_highlight_name, {
+		fg = icon_color,
+		bg = statusbar_side_colors[scene_name],
+	})
 
 	utils.set_hl(
 		'lualine_' .. lualine.diagnostics_component .. '_diagnostics_error',
