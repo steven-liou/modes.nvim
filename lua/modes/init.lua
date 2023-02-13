@@ -118,6 +118,14 @@ M.highlight = function(scene_event)
 		return
 	end
 
+	-- map keymap events to actual scene names
+	local scene_name = scene_event
+	if scene_event == 'char_replace' then
+		scene_name = 'replace'
+	elseif scene_event == 'insert' and in_change_mode then
+		scene_name = 'change'
+	end
+
 	local winhl_map = {}
 	local prev_value = vim.api.nvim_win_get_option(0, 'winhighlight')
 
@@ -127,14 +135,6 @@ M.highlight = function(scene_event)
 			local pair = vim.split(winhl, ':')
 			winhl_map[pair[1]] = pair[2]
 		end
-	end
-
-	-- map keymap events to actual scene names
-	local scene_name = scene_event
-	if scene_event == 'char_replace' then
-		scene_name = 'replace'
-	elseif scene_event == 'insert' and in_change_mode then
-		scene_name = 'change'
 	end
 
 	-- overrides 'builtin':'hl' if the current scene has a mapping for it
@@ -148,6 +148,7 @@ M.highlight = function(scene_event)
 	end
 	vim.api.nvim_win_set_option(0, 'winhighlight', table.concat(new_value, ','))
 
+	-- set showmoe message colors in command line section, like --Insert-- or --Visual--
 	if vim.api.nvim_get_option('showmode') then
 		if scene_event == 'visual' then
 			utils.set_hl('ModeMsg', { link = 'ModesVisualModeMsg' })
@@ -158,6 +159,7 @@ M.highlight = function(scene_event)
 		end
 	end
 
+	-- link cursor colors for operator and normal modes
 	if config.set_cursor then
 		if scene_event == 'normal' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesNormal' })
@@ -177,6 +179,16 @@ M.highlight = function(scene_event)
 		elseif scene_event == 'redo' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesRedo' })
 		end
+	end
+
+	-- for colorful-winsep plugin support
+	if config.set_colorful_sep then
+		utils.set_hl('NvimSeparator', { fg = colors[scene_name] })
+	end
+
+	-- set popup float border color
+	if config.set_float_border then
+		utils.set_hl('FloatBorder', { fg = colors[scene_name] })
 	end
 
 	lualine.highlight(config, scene_event, scene_name)
