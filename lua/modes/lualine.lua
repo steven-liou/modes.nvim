@@ -76,15 +76,6 @@ M.highlight = function(config, scene_event, scene_name)
 		return
 	end
 
-	local colors = config.colors
-	local lualine = config.lualine
-	local fg_def =
-		{ fg = colors.black_text, bg = colors[scene_name], gui = 'bold' }
-	local bg_def =
-		{ fg = colors.white_text, bg = statusbar_middle_colors[scene_name] }
-	local statusbar_def =
-		{ fg = colors[scene_event], bg = statusbar_side_colors[scene_name] }
-
 	if
 		scene_event == 'copy'
 		or scene_event == 'delete'
@@ -96,6 +87,15 @@ M.highlight = function(config, scene_event, scene_name)
 	then
 		scene_event = 'normal'
 	end
+
+	local colors = config.colors
+	local lualine = config.lualine
+	local fg_def =
+		{ fg = colors.black_text, bg = colors[scene_name], gui = 'bold' }
+	local bg_def =
+		{ fg = colors.white_text, bg = statusbar_middle_colors[scene_name] }
+	local statusbar_def =
+		{ fg = colors[scene_name], bg = statusbar_side_colors[scene_name] }
 	utils.set_hl(('lualine_a_%s'):format(scene_event), fg_def)
 	utils.set_hl(('lualine_b_%s'):format(scene_event), statusbar_def)
 	utils.set_hl(('lualine_c_%s'):format(scene_event), bg_def)

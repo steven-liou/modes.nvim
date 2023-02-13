@@ -4,6 +4,7 @@ local aerial = require('modes.aerial')
 local bufferline = require('modes.bufferline')
 local reset_delay = 500
 local reset_timer = nil
+local in_change_mode = false
 
 local M = {}
 local config = {}
@@ -86,6 +87,12 @@ local winhighlight = {
 		CursorLineSign = 'ModesRedoCursorLineSign',
 		CursorLineFold = 'ModesRedoCursorLineFold',
 	},
+	change = {
+		CursorLine = 'ModesChangeCursorLine',
+		CursorLineNr = 'ModesChangeCursorLineNr',
+		CursorLineSign = 'ModesChangeCursorLineSign',
+		CursorLineFold = 'ModesChangeCursorLineFold',
+	},
 }
 local colors = {}
 local shaded_colors = {}
@@ -95,7 +102,11 @@ local in_ignored_buffer = function()
 end
 
 M.reset = function()
+	if in_change_mode then
+		return
+	end
 	M.highlight('normal')
+	M.swap_insert_highlight()
 	reset_timer = nil
 	operator_started = false
 end
@@ -122,8 +133,8 @@ M.highlight = function(scene_event)
 	local scene_name = scene_event
 	if scene_event == 'char_replace' then
 		scene_name = 'replace'
-	elseif scene_event == 'change' then
-		scene_name = 'insert'
+	elseif scene_event == 'insert' and in_change_mode then
+		scene_name = 'change'
 	end
 
 	-- overrides 'builtin':'hl' if the current scene has a mapping for it
@@ -142,6 +153,8 @@ M.highlight = function(scene_event)
 			utils.set_hl('ModeMsg', { link = 'ModesVisualModeMsg' })
 		elseif scene_event == 'insert' then
 			utils.set_hl('ModeMsg', { link = 'ModesInsertModeMsg' })
+		elseif scene_event == 'change' then
+			utils.set_hl('ModeMsg', { link = 'ModesChangeModeMsg' })
 		end
 	end
 
@@ -152,7 +165,8 @@ M.highlight = function(scene_event)
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesDelete' })
 			utils.set_hl('ModesNormalCursor', { link = 'ModesDelete' })
 		elseif scene_event == 'change' then
-			utils.set_hl('ModesOperatorCursor', { link = 'ModesInsert' })
+			utils.set_hl('ModesOperatorCursor', { link = 'ModesChange' })
+			utils.set_hl('ModesNormalCursor', { link = 'ModesChange' })
 		elseif scene_event == 'copy' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesCopy' })
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesCopy' })
@@ -165,12 +179,20 @@ M.highlight = function(scene_event)
 		end
 	end
 
-	if mode == 'Insert' then
-	end
-
 	lualine.highlight(config, scene_event, scene_name)
 	aerial.highlight(config, scene_event, scene_name)
 	bufferline.highlight(config, scene_name)
+end
+
+M.swap_insert_highlight = function()
+	if in_change_mode then
+		colors.insert = colors.change
+		shaded_colors.insert = shaded_colors.change
+	else
+		colors.insert = colors.original_insert
+		shaded_colors.insert = shaded_colors.original_insert
+	end
+	M.define_highlight_groups('Insert')
 end
 
 M.define_highlight_groups = function(mode)
@@ -187,6 +209,8 @@ M.define_highlight_groups = function(mode)
 
 	if mode == 'Insert' then
 		utils.set_hl('ModesInsertModeMsg', { fg = colors.insert })
+	elseif mode == 'Change' then
+		utils.set_hl('ModesChangeModeMsg', { fg = colors.change })
 	elseif mode == 'Visual' then
 		utils.set_hl('ModesVisualModeMsg', { fg = colors.visual })
 		utils.set_hl('ModesVisualVisual', { bg = shaded_colors.visual })
@@ -201,6 +225,7 @@ M.define = function()
 		copy = config.colors.copy or utils.get_bg('ModesCopy', '#f5c359'),
 		delete = config.colors.delete or utils.get_bg('ModesDelete', '#c75c6a'),
 		insert = config.colors.insert or utils.get_bg('ModesInsert', '#569CD6'),
+		change = config.colors.change or utils.get_bg('ModesChange', '#c75c6a'),
 		visual = config.colors.visual or utils.get_bg('ModesVisual', '#C586C0'),
 		pending = config.colors.pending
 			or utils.get_bg('ModesVisual', '#4ec9b0'),
@@ -212,8 +237,11 @@ M.define = function()
 		redo = config.colors.redo or utils.get_bg('ModesRedo', '#9745be'),
 	}
 
+	colors.original_insert = colors.insert
 	config.colors = colors
+
 	shaded_colors = utils.define_component_opacity(config, 'line_opacity')
+	shaded_colors.original_insert = shaded_colors.insert
 	config.shaded_colors = shaded_colors
 
 	---Create highlight groups
@@ -228,6 +256,7 @@ M.define = function()
 		'Replace',
 		'Undo',
 		'Redo',
+		'Change',
 	}) do
 		M.define_highlight_groups(mode)
 	end
@@ -351,6 +380,7 @@ M.setup = function(opts)
 		end
 
 		if key == utils.get_termcode('<esc>') then
+			in_change_mode = false
 			M.reset()
 		end
 
@@ -365,6 +395,8 @@ M.setup = function(opts)
 			end
 
 			if key == 'c' then
+				in_change_mode = true
+				M.swap_insert_highlight()
 				M.highlight('change')
 				operator_started = true
 				delay_oprator_reset()
