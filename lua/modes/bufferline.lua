@@ -45,8 +45,6 @@ M.highlight = function(config, scene_name)
 	for _, name in ipairs(bufferline_foreground_groups) do
 		local highlight_colors = utils.get_highlight_colors_by_name(name)
 		if highlight_colors then
-			local bg_color = highlight_colors.background
-				or config.bufferline.background_color
 			local fg_def = {
 				fg = colors[scene_name],
 				bg = color_opacity[scene_name],
