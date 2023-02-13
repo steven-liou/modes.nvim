@@ -165,9 +165,32 @@ M.highlight = function(scene_event)
 		end
 	end
 
+	if mode == 'Insert' then
+	end
+
 	lualine.highlight(config, scene_event, scene_name)
 	aerial.highlight(config, scene_event, scene_name)
 	bufferline.highlight(config, scene_name)
+end
+
+M.define_highlight_groups = function(mode)
+	local def = { fg = colors[mode:lower()], bg = shaded_colors[mode:lower()] }
+	local bg_def = { bg = colors[mode:lower()] }
+	local bg_shade_def = { bg = shaded_colors[mode:lower()] }
+	local mode_highlight_name = ('Modes%s'):format(mode)
+	utils.set_hl(mode_highlight_name, bg_def)
+
+	utils.set_hl(('Modes%sCursorLine'):format(mode), bg_shade_def)
+	utils.set_hl(('Modes%sCursorLineNr'):format(mode), def)
+	utils.set_hl(('Modes%sCursorLineSign'):format(mode), bg_shade_def)
+	utils.set_hl(('Modes%sCursorLineFold'):format(mode), bg_shade_def)
+
+	if mode == 'Insert' then
+		utils.set_hl('ModesInsertModeMsg', { fg = colors.insert })
+	elseif mode == 'Visual' then
+		utils.set_hl('ModesVisualModeMsg', { fg = colors.visual })
+		utils.set_hl('ModesVisualVisual', { bg = shaded_colors.visual })
+	end
 end
 
 M.define = function()
@@ -206,22 +229,8 @@ M.define = function()
 		'Undo',
 		'Redo',
 	}) do
-		local def =
-			{ fg = colors[mode:lower()], bg = shaded_colors[mode:lower()] }
-		local bg_def = { bg = colors[mode:lower()] }
-		local bg_shade_def = { bg = shaded_colors[mode:lower()] }
-		local mode_highlight_name = ('Modes%s'):format(mode)
-		utils.set_hl(mode_highlight_name, bg_def)
-
-		utils.set_hl(('Modes%sCursorLine'):format(mode), bg_shade_def)
-		utils.set_hl(('Modes%sCursorLineNr'):format(mode), def)
-		utils.set_hl(('Modes%sCursorLineSign'):format(mode), bg_shade_def)
-		utils.set_hl(('Modes%sCursorLineFold'):format(mode), bg_shade_def)
+		M.define_highlight_groups(mode)
 	end
-
-	utils.set_hl('ModesInsertModeMsg', { fg = colors.insert })
-	utils.set_hl('ModesVisualModeMsg', { fg = colors.visual })
-	utils.set_hl('ModesVisualVisual', { bg = shaded_colors.visual })
 
 	if config.set_yanked_background then
 		vim.api.nvim_create_autocmd('TextYankPost', {
