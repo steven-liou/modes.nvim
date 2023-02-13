@@ -156,6 +156,8 @@ M.highlight = function(scene_event)
 			utils.set_hl('ModeMsg', { link = 'ModesInsertModeMsg' })
 		elseif scene_event == 'change' then
 			utils.set_hl('ModeMsg', { link = 'ModesChangeModeMsg' })
+		else
+			utils.set_hl('ModeMsg', { link = 'Normal' })
 		end
 	end
 

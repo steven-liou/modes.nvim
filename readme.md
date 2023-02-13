@@ -116,8 +116,14 @@ require("modes").setup({
 	-- Enable line number highlights to match cursorline
 	set_number = true,
 
-  -- Enable highlight background after text yank (uses copy)
+    -- Enable highlight background after text yank (uses copy)
 	set_yanked_background = true,
+
+	-- Set colorful-winsep.nvim border highlight
+	set_colorful_sep = true,
+
+	-- set float border highlight
+	set_float_border = true,
 
 	-- Highlight in active window only
 	focus_only = false,
