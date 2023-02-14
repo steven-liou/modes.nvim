@@ -2,6 +2,7 @@ local utils = require('modes.utils')
 local lualine = require('modes.lualine')
 local gitsigns = require('modes.gitsigns')
 local diagnostics = require('modes.diagnostics')
+local todos = require('modes.todos')
 local aerial = require('modes.aerial')
 local bufferline = require('modes.bufferline')
 local reset_delay = 500
@@ -99,6 +100,7 @@ M.highlight = function(scene_event)
 	bufferline.highlight(config, scene_name)
 	diagnostics.highlight(config, scene_name)
 	gitsigns.highlight(config, scene_name)
+	todos.highlight(config, scene_name)
 end
 
 M.swap_insert_highlight = function()
@@ -241,9 +243,10 @@ M.define = function()
 		end
 	end
 
+	lualine.define(config)
 	gitsigns.define(config)
 	diagnostics.define(config)
-	lualine.define(config)
+	todos.define(config)
 	aerial.define(config)
 	bufferline.define(config)
 end
