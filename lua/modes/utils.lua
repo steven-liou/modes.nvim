@@ -134,21 +134,33 @@ M.print_table = function(table)
 	end
 end
 
-M.define_component_opacity = function(config, level1, level2)
+M.define_component_opacity = function(config, ...)
 	local normal_bg = M.get_bg('Normal', 'Normal')
 	local colors = config.colors
 	local settings = nil
 
-	if level2 then
-		settings = config[level1][level2]
-	else
-		settings = config[level1]
+	for _, level in ipairs({ ... }) do
+		if settings == nil then
+			settings = config[level]
+		else
+			settings = settings[level]
+		end
 	end
-	M.set_opacity(settings)
+
+	if settings == nil then
+		return
+	end
 
 	local opacity = {}
-	for key, _ in pairs(settings) do
-		opacity[key] = M.blend(colors[key], normal_bg, settings[key])
+	if type(settings) == 'number' then
+		for key, _ in pairs(colors) do
+			opacity[key] = M.blend(colors[key], normal_bg, settings)
+		end
+	else
+		M.set_opacity(settings)
+		for key, _ in pairs(settings) do
+			opacity[key] = M.blend(colors[key], normal_bg, settings[key])
+		end
 	end
 	return opacity
 end

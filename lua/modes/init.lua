@@ -95,6 +95,7 @@ local winhighlight = {
 	},
 }
 local colors = {}
+local additional_colors = {}
 local shaded_colors = {}
 local operator_started = false
 local in_ignored_buffer = function()
@@ -183,14 +184,17 @@ M.highlight = function(scene_event)
 		end
 	end
 
-	-- for colorful-winsep plugin support
-	if config.set_colorful_sep then
-		utils.set_hl('NvimSeparator', { fg = colors[scene_name] })
-	end
+	-- set additional highlight groups
+	for hl_group, settings in pairs(config.additional_highlight_groups) do
+		local hl_def = {}
+		if settings.fg and settings.fg.enabled then
+			hl_def.fg = additional_colors[hl_group].fg_colors[scene_name]
+		end
 
-	-- set popup float border color
-	if config.set_float_border then
-		utils.set_hl('FloatBorder', { fg = colors[scene_name] })
+		if settings.bg and settings.bg.enabled then
+			hl_def.bg = additional_colors[hl_group].bg_colors[scene_name]
+		end
+		utils.set_hl(hl_group, hl_def)
 	end
 
 	lualine.highlight(config, scene_event, scene_name)
@@ -283,6 +287,38 @@ M.define = function()
 		})
 
 		utils.set_hl('TextYanked', { bg = shaded_colors.copy })
+	end
+
+	-- create additional highlights
+	for hl_group, settings in pairs(config.additional_highlight_groups) do
+		local hl_group_colors = {}
+		if settings.fg and settings.fg.enabled then
+			if settings.fg.opacity ~= nil then
+				hl_group_colors.fg_colors = utils.define_component_opacity(
+					config,
+					'additional_highlight_groups',
+					hl_group,
+					'fg',
+					'opacity'
+				)
+			else
+				hl_group_colors.fg_colors = colors
+			end
+		end
+		if settings.bg and settings.bg.enabled then
+			if settings.bg and settings.bg.opacity ~= nil then
+				hl_group_colors.bg_colors = utils.define_component_opacity(
+					config,
+					'additional_highlight_groups',
+					hl_group,
+					'bg',
+					'opacity'
+				)
+			else
+				hl_group_colors.bg_colors = colors
+			end
+		end
+		additional_colors[hl_group] = hl_group_colors
 	end
 
 	lualine.define(config)

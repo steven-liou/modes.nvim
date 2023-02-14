@@ -119,11 +119,14 @@ require("modes").setup({
     -- Enable highlight background after text yank (uses copy)
 	set_yanked_background = true,
 
-	-- Set colorful-winsep.nvim border highlight
-	set_colorful_sep = true,
-
-	-- set float border highlight
-	set_float_border = true,
+    -- For additional highlight groups you wish to change the colors based on modes
+	additional_highlight_groups = {
+		NvimSeparator = { fg = { enabled = true, opacity = 0.2 } }, -- for colorful-winsep.nvim
+		IndentBlanklineContext = { fg = { enabled = true } }, -- for indent-blankline.nvim
+		VirtColumn = { fg = { enabled = true, opacity = 0.2 } }, -- for virt-column.nvim
+		MatchArea = { bg = { enabled = true, opacity = 0.1 } }, -- for hl_match_area.nvim
+		FloatBorder = { fg = { enabled = true, opacity = 0.4 } },
+	},
 
 	-- Highlight in active window only
 	focus_only = false,
