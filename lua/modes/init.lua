@@ -10,18 +10,20 @@ local M = {}
 local config = {}
 local default_config = {
 	colors = {},
-	line_opacity = {
-		normal = 0.15,
-		copy = 0.15,
-		delete = 0.15,
-		insert = 0.15,
-		visual = 0.15,
-		operator = 0.15,
-		command = 0.15,
-		replace = 0.15,
+	cursorline = {
+		enabled = true,
+		opacity = {
+			normal = 0.15,
+			copy = 0.15,
+			delete = 0.15,
+			insert = 0.15,
+			visual = 0.15,
+			operator = 0.15,
+			command = 0.15,
+			replace = 0.15,
+		},
 	},
 	set_cursor = true,
-	set_cursorline = true,
 	set_number = true,
 	ignore_filetypes = { 'NvimTree', 'TelescopePrompt' },
 }
@@ -258,7 +260,8 @@ M.define = function()
 	colors.original_insert = colors.insert
 	config.colors = colors
 
-	shaded_colors = utils.define_component_opacity(config, 'line_opacity')
+	shaded_colors =
+		utils.define_component_opacity(config, 'cursorline', 'opacity')
 	shaded_colors.original_insert = shaded_colors.insert
 	config.shaded_colors = shaded_colors
 
@@ -370,7 +373,7 @@ M.enable_managed_ui = function()
 		})
 	end
 
-	if config.set_cursorline then
+	if config.cursorline.enabled then
 		vim.opt.cursorline = true
 	end
 end
@@ -390,7 +393,7 @@ M.disable_managed_ui = function()
 		vim.api.nvim_clear_autocmds({ group = group })
 	end
 
-	if config.set_cursorline then
+	if config.cursorline.enabled then
 		vim.opt.cursorline = false
 	end
 end

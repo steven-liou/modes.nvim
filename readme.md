@@ -42,18 +42,28 @@ require("modes").setup({
 	},
 
 	-- Cursorline highlight opacity
-	line_opacity = {
-		normal = 0.1,
-		insert = 0.1,
-		visual = 0.1,
-		replace = 0.1,
-		command = 0.1,
-		pending = 0.1,
-		copy = 0.1,
-		delete = 0.1,
-		undo = 0.1,
-		redo = 0.1,
+	cursorline = {
+		enabled = true,
+		opacity = {
+			normal = 0.1,
+			insert = 0.1,
+			visual = 0.1,
+			replace = 0.1,
+			command = 0.1,
+			pending = 0.1,
+			copy = 0.1,
+			delete = 0.1,
+			undo = 0.1,
+			redo = 0.1,
+		},
 	},
+
+	-- Highlight cursor
+	set_cursor = true,
+	-- Enable line number highlights to match cursorline
+	set_number = true,
+	set_yanked_background = true,
+
 	-- Highlight lualine
 	lualine = {
 		enabled = true,
@@ -105,19 +115,6 @@ require("modes").setup({
             redo = 0.08,
 		},
 	},
-
-	-- Highlight cursor
-	set_cursor = true,
-
-	-- Enable cursorline initially, and disable cursorline for inactive windows
-	-- or ignored filetypes
-	set_cursorline = true,
-
-	-- Enable line number highlights to match cursorline
-	set_number = true,
-
-    -- Enable highlight background after text yank (uses copy)
-	set_yanked_background = true,
 
     -- For additional highlight groups you wish to change the colors based on modes
 	additional_highlight_groups = {
