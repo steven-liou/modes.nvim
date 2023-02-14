@@ -4,6 +4,10 @@ local statusbar_middle_colors = {}
 local M = {}
 
 M.define = function(config)
+	if not config.lualine.enabled then
+		return
+	end
+
 	statusbar_middle_colors = utils.define_component_opacity(
 		config,
 		'lualine',

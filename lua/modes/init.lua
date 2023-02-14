@@ -1,5 +1,6 @@
 local utils = require('modes.utils')
 local lualine = require('modes.lualine')
+local gitsigns = require('modes.gitsigns')
 local aerial = require('modes.aerial')
 local bufferline = require('modes.bufferline')
 local reset_delay = 500
@@ -95,6 +96,7 @@ M.highlight = function(scene_event)
 	lualine.highlight(config, scene_event, scene_name)
 	aerial.highlight(config, scene_event, scene_name)
 	bufferline.highlight(config, scene_name)
+	gitsigns.highlight(config, scene_name)
 end
 
 M.swap_insert_highlight = function()
@@ -203,6 +205,8 @@ M.define = function()
 		highlight_groups_colors[hl_group] = hl_group_colors
 	end
 
+	config.highlight_groups_colors = highlight_groups_colors
+
 	---Create highlight groups
 	for _, mode in ipairs({
 		'Normal',
@@ -235,6 +239,7 @@ M.define = function()
 		end
 	end
 
+	gitsigns.define(config)
 	lualine.define(config)
 	aerial.define(config)
 	bufferline.define(config)

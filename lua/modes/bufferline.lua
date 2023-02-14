@@ -14,6 +14,9 @@ local bufferline_foreground_groups = {
 }
 
 M.define = function(config)
+	if not config.bufferline.enabled then
+		return
+	end
 	color_opacity =
 		utils.define_component_opacity(config, 'bufferline', 'opacity')
 end
