@@ -31,6 +31,7 @@ require("modes").setup({
         white_text = "#d4d4d4",
 		normal = "#608b4e",
 		insert = "#569cd6",
+		change = "#41729F",
 		visual = "#c586c0",
 		replace = "#d16969",
 		command = "#deb974",
@@ -47,6 +48,7 @@ require("modes").setup({
 		opacity = {
 			normal = 0.1,
 			insert = 0.1,
+			change = 0.1,
 			visual = 0.1,
 			replace = 0.1,
 			command = 0.1,
@@ -70,6 +72,7 @@ require("modes").setup({
 		statusbar_side_opacity = {
 			normal = 0.1,
 			copy = 0.2,
+			change = 0.2,
 			delete = 0.15,
 			insert = 0.10,
 			visual = 0.15,
@@ -84,6 +87,7 @@ require("modes").setup({
 			copy = 0.12,
 			delete = 0.12,
 			insert = 0.12,
+            change = 0.12,
 			visual = 0.12,
 			command = 0.12,
 			replace = 0.12,
@@ -107,6 +111,7 @@ require("modes").setup({
 			copy = 0.08,
 			delete = 0.1,
 			insert = 0.06,
+            change = 0.08
 			visual = 0.1,
 			command = 0.1,
 			replace = 0.08,
