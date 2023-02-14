@@ -142,6 +142,7 @@ require("modes").setup({
 -- Exposed highlight groups, useful for themes
 vim.cmd('hi ModesNormal guibg=#608b4e')
 vim.cmd('hi ModesInsert guibg=#569cd6')
+vim.cmd('hi ModesChange guibg=#9745be')
 vim.cmd('hi ModesVisual guibg=#c586d0')
 vim.cmd('hi ModesReplace guibg=#d16969')
 vim.cmd('hi ModesCommand guibg=#deb974')
