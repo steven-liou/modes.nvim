@@ -10,95 +10,10 @@ local M = {}
 local config = {}
 local default_config = {
 	colors = {},
-	cursorline = {
-		enabled = true,
-		opacity = {
-			normal = 0.15,
-			copy = 0.15,
-			delete = 0.15,
-			insert = 0.15,
-			visual = 0.15,
-			operator = 0.15,
-			command = 0.15,
-			replace = 0.15,
-		},
-	},
-	set_cursor = true,
-	set_number = true,
 	ignore_filetypes = { 'NvimTree', 'TelescopePrompt' },
 }
-local winhighlight = {
-	normal = {
-		CursorLine = 'ModesNormalCursorLine',
-		CursorLineNr = 'ModesNormalCursorLineNr',
-		CursorLineSign = 'ModesNormalCursorLineSign',
-		CursorLineFold = 'ModesNormalCursorLineFold',
-	},
-	copy = {
-		CursorLine = 'ModesCopyCursorLine',
-		CursorLineNr = 'ModesCopyCursorLineNr',
-		CursorLineSign = 'ModesCopyCursorLineSign',
-		CursorLineFold = 'ModesCopyCursorLineFold',
-	},
-	insert = {
-		CursorLine = 'ModesInsertCursorLine',
-		CursorLineNr = 'ModesInsertCursorLineNr',
-		CursorLineSign = 'ModesInsertCursorLineSign',
-		CursorLineFold = 'ModesInsertCursorLineFold',
-	},
-	delete = {
-		CursorLine = 'ModesDeleteCursorLine',
-		CursorLineNr = 'ModesDeleteCursorLineNr',
-		CursorLineSign = 'ModesDeleteCursorLineSign',
-		CursorLineFold = 'ModesDeleteCursorLineFold',
-	},
-	visual = {
-		CursorLine = 'ModesVisualCursorLine',
-		CursorLineNr = 'ModesVisualCursorLineNr',
-		CursorLineSign = 'ModesVisualCursorLineSign',
-		CursorLineFold = 'ModesVisualCursorLineFold',
-		Visual = 'ModesVisualVisual',
-	},
-	command = {
-		CursorLine = 'ModesCommandCursorLine',
-		CursorLineNr = 'ModesCommandCursorLineNr',
-		CursorLineSign = 'ModesCommandCursorLineSign',
-		CursorLineFold = 'ModesCommandCursorLineFold',
-	},
-	replace = {
-		CursorLine = 'ModesReplaceCursorLine',
-		CursorLineNr = 'ModesReplaceCursorLineNr',
-		CursorLineSign = 'ModesReplaceCursorLineSign',
-		CursorLineFold = 'ModesReplaceCursorLineFold',
-	},
-	pending = {
-		CursorLine = 'ModesPendingCursorLine',
-		CursorLineNr = 'ModesPendingCursorLineNr',
-		CursorLineSign = 'ModesPendingCursorLineSign',
-		CursorLineFold = 'ModesPendingCursorLineFold',
-	},
-	undo = {
-		CursorLine = 'ModesUndoCursorLine',
-		CursorLineNr = 'ModesUndoCursorLineNr',
-		CursorLineSign = 'ModesUndoCursorLineSign',
-		CursorLineFold = 'ModesUndoCursorLineFold',
-	},
-	redo = {
-		CursorLine = 'ModesRedoCursorLine',
-		CursorLineNr = 'ModesRedoCursorLineNr',
-		CursorLineSign = 'ModesRedoCursorLineSign',
-		CursorLineFold = 'ModesRedoCursorLineFold',
-	},
-	change = {
-		CursorLine = 'ModesChangeCursorLine',
-		CursorLineNr = 'ModesChangeCursorLineNr',
-		CursorLineSign = 'ModesChangeCursorLineSign',
-		CursorLineFold = 'ModesChangeCursorLineFold',
-	},
-}
 local colors = {}
-local additional_colors = {}
-local shaded_colors = {}
+local highlight_groups_colors = {}
 local operator_started = false
 local in_ignored_buffer = function()
 	return vim.tbl_contains(config.ignore_filetypes, vim.bo.filetype)
@@ -128,28 +43,6 @@ M.highlight = function(scene_event)
 	elseif scene_event == 'insert' and in_change_mode then
 		scene_name = 'change'
 	end
-
-	local winhl_map = {}
-	local prev_value = vim.api.nvim_win_get_option(0, 'winhighlight')
-
-	-- mapping the old value of 'winhighlight'
-	if prev_value ~= '' then
-		for _, winhl in ipairs(vim.split(prev_value, ',')) do
-			local pair = vim.split(winhl, ':')
-			winhl_map[pair[1]] = pair[2]
-		end
-	end
-
-	-- overrides 'builtin':'hl' if the current scene has a mapping for it
-	for builtin, hl in pairs(winhighlight[scene_name]) do
-		winhl_map[builtin] = hl
-	end
-
-	local new_value = {}
-	for builtin, hl in pairs(winhl_map) do
-		table.insert(new_value, ('%s:%s'):format(builtin, hl))
-	end
-	vim.api.nvim_win_set_option(0, 'winhighlight', table.concat(new_value, ','))
 
 	-- set showmoe message colors in command line section, like --Insert-- or --Visual--
 	if vim.api.nvim_get_option('showmode') then
@@ -186,15 +79,15 @@ M.highlight = function(scene_event)
 		end
 	end
 
-	-- set additional highlight groups
-	for hl_group, settings in pairs(config.additional_highlight_groups) do
+	-- set highlight groups
+	for hl_group, settings in pairs(config.highlight_groups) do
 		local hl_def = {}
 		if settings.fg and settings.fg.enabled then
-			hl_def.fg = additional_colors[hl_group].fg_colors[scene_name]
+			hl_def.fg = highlight_groups_colors[hl_group].fg_colors[scene_name]
 		end
 
 		if settings.bg and settings.bg.enabled then
-			hl_def.bg = additional_colors[hl_group].bg_colors[scene_name]
+			hl_def.bg = highlight_groups_colors[hl_group].bg_colors[scene_name]
 		end
 		utils.set_hl(hl_group, hl_def)
 	end
@@ -207,25 +100,34 @@ end
 M.swap_insert_highlight = function()
 	if in_change_mode then
 		colors.insert = colors.change
-		shaded_colors.insert = shaded_colors.change
+		for _, group_colors in pairs(highlight_groups_colors) do
+			if group_colors.fg_colors ~= nil then
+				group_colors.fg_colors.insert = group_colors.fg_colors.change
+			end
+			if group_colors.bg_colors ~= nil then
+				group_colors.bg_colors.insert = group_colors.bg_colors.change
+			end
+		end
 	else
 		colors.insert = colors.original_insert
-		shaded_colors.insert = shaded_colors.original_insert
+		for _, group_colors in pairs(highlight_groups_colors) do
+			if group_colors.fg_colors ~= nil then
+				group_colors.fg_colors.insert =
+					group_colors.fg_colors.original_insert
+			end
+			if group_colors.bg_colors ~= nil then
+				group_colors.bg_colors.insert =
+					group_colors.bg_colors.original_insert
+			end
+		end
 	end
 	M.define_highlight_groups('Insert')
 end
 
 M.define_highlight_groups = function(mode)
-	local def = { fg = colors[mode:lower()], bg = shaded_colors[mode:lower()] }
 	local bg_def = { bg = colors[mode:lower()] }
-	local bg_shade_def = { bg = shaded_colors[mode:lower()] }
 	local mode_highlight_name = ('Modes%s'):format(mode)
 	utils.set_hl(mode_highlight_name, bg_def)
-
-	utils.set_hl(('Modes%sCursorLine'):format(mode), bg_shade_def)
-	utils.set_hl(('Modes%sCursorLineNr'):format(mode), def)
-	utils.set_hl(('Modes%sCursorLineSign'):format(mode), bg_shade_def)
-	utils.set_hl(('Modes%sCursorLineFold'):format(mode), bg_shade_def)
 
 	if mode == 'Insert' then
 		utils.set_hl('ModesInsertModeMsg', { fg = colors.insert })
@@ -233,7 +135,14 @@ M.define_highlight_groups = function(mode)
 		utils.set_hl('ModesChangeModeMsg', { fg = colors.change })
 	elseif mode == 'Visual' then
 		utils.set_hl('ModesVisualModeMsg', { fg = colors.visual })
-		utils.set_hl('ModesVisualVisual', { bg = shaded_colors.visual })
+		if
+			highlight_groups_colors.Cursorline ~= nil
+			and highlight_groups_colors.Cursorline.bg_colors ~= nil
+		then
+			utils.set_hl('Visual', {
+				bg = highlight_groups_colors.Cursorline.bg_colors.visual,
+			})
+		end
 	end
 end
 
@@ -260,10 +169,39 @@ M.define = function()
 	colors.original_insert = colors.insert
 	config.colors = colors
 
-	shaded_colors =
-		utils.define_component_opacity(config, 'cursorline', 'opacity')
-	shaded_colors.original_insert = shaded_colors.insert
-	config.shaded_colors = shaded_colors
+	-- create highlight groups colors
+	for hl_group, settings in pairs(config.highlight_groups) do
+		local hl_group_colors = {}
+		if settings.fg and settings.fg.enabled then
+			if settings.fg.opacity ~= nil then
+				hl_group_colors.fg_colors = utils.define_component_opacity(
+					config,
+					'highlight_groups',
+					hl_group,
+					'fg',
+					'opacity'
+				)
+			else
+				hl_group_colors.fg_colors = colors
+			end
+		end
+		if settings.bg and settings.bg.enabled then
+			if settings.bg and settings.bg.opacity ~= nil then
+				hl_group_colors.bg_colors = utils.define_component_opacity(
+					config,
+					'highlight_groups',
+					hl_group,
+					'bg',
+					'opacity'
+				)
+			else
+				hl_group_colors.bg_colors = colors
+			end
+			hl_group_colors.bg_colors.original_insert =
+				hl_group_colors.bg_colors.insert
+		end
+		highlight_groups_colors[hl_group] = hl_group_colors
+	end
 
 	---Create highlight groups
 	for _, mode in ipairs({
@@ -289,39 +227,12 @@ M.define = function()
 			desc = 'Highlight yanked text',
 		})
 
-		utils.set_hl('TextYanked', { bg = shaded_colors.copy })
-	end
-
-	-- create additional highlights
-	for hl_group, settings in pairs(config.additional_highlight_groups) do
-		local hl_group_colors = {}
-		if settings.fg and settings.fg.enabled then
-			if settings.fg.opacity ~= nil then
-				hl_group_colors.fg_colors = utils.define_component_opacity(
-					config,
-					'additional_highlight_groups',
-					hl_group,
-					'fg',
-					'opacity'
-				)
-			else
-				hl_group_colors.fg_colors = colors
-			end
+		if config.set_yanked_background then
+			utils.set_hl(
+				'TextYanked',
+				{ bg = highlight_groups_colors.Cursorline.bg_colors.copy }
+			)
 		end
-		if settings.bg and settings.bg.enabled then
-			if settings.bg and settings.bg.opacity ~= nil then
-				hl_group_colors.bg_colors = utils.define_component_opacity(
-					config,
-					'additional_highlight_groups',
-					hl_group,
-					'bg',
-					'opacity'
-				)
-			else
-				hl_group_colors.bg_colors = colors
-			end
-		end
-		additional_colors[hl_group] = hl_group_colors
 	end
 
 	lualine.define(config)
@@ -373,7 +284,7 @@ M.enable_managed_ui = function()
 		})
 	end
 
-	if config.cursorline.enabled then
+	if config.highlight_groups.Cursorline ~= nil then
 		vim.opt.cursorline = true
 	end
 end
@@ -393,9 +304,7 @@ M.disable_managed_ui = function()
 		vim.api.nvim_clear_autocmds({ group = group })
 	end
 
-	if config.cursorline.enabled then
-		vim.opt.cursorline = false
-	end
+	vim.opt.cursorline = false
 end
 
 local function delay_oprator_reset()
