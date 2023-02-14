@@ -20,7 +20,6 @@ M.define = function(config)
 	end
 	color_opacity =
 		utils.define_component_opacity(config, 'gitsigns', 'opacity')
-	utils.print_table(color_opacity)
 end
 
 M.highlight = function(config, scene_name)
