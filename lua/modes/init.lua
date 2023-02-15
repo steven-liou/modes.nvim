@@ -44,24 +44,17 @@ M.highlight = function(scene_event)
 	local scene_name = scene_event
 	if scene_event == 'char_replace' then
 		scene_name = 'replace'
-	elseif scene_event == 'insert' and in_change_mode then
-		scene_name = 'change'
+	-- elseif scene_event == 'insert' and in_change_mode then
+	-- 	scene_name = 'change'
 	elseif scene_event == 'insert_capslock' then
-		print(('Modes%s'):format(utils.titlecase(config.capslock.color)))
-		scene_name = 'insert'
+		scene_name = config.capslock.color
 	end
 
 	-- set showmoe message colors in command line section, like --Insert-- or --Visual--
-	if vim.api.nvim_get_option('showmode') then
-		if scene_event == 'visual' then
-			utils.set_hl('ModeMsg', { link = 'ModesVisualModeMsg' })
-		elseif scene_event == 'insert' then
-			utils.set_hl('ModeMsg', { link = 'ModesInsertModeMsg' })
-		elseif scene_event == 'change' then
-			utils.set_hl('ModeMsg', { link = 'ModesChangeModeMsg' })
-		else
-			utils.set_hl('ModeMsg', { link = 'Normal' })
-		end
+	if
+		vim.api.nvim_get_option('showmode') -- and scene_name == 'insert'
+	then
+		utils.set_hl('ModeMsg', { fg = colors[scene_name] })
 	end
 
 	-- link cursor colors for operator and normal modes
@@ -74,6 +67,7 @@ M.highlight = function(scene_event)
 		elseif scene_event == 'change' then
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesChange' })
 			utils.set_hl('ModesNormalCursor', { link = 'ModesChange' })
+			utils.set_hl('ModeMsg', { fg = colors[scene_name] })
 		elseif scene_event == 'copy' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesCopy' })
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesCopy' })
@@ -83,12 +77,6 @@ M.highlight = function(scene_event)
 			utils.set_hl('ModesNormalCursor', { link = 'ModesUndo' })
 		elseif scene_event == 'redo' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesRedo' })
-		elseif scene_event == 'insert_capslock' then
-			utils.set_hl('ModesInsert', {
-				link = ('Modes%s'):format(
-					utils.titlecase(config.capslock.color)
-				),
-			})
 		end
 	end
 
@@ -144,17 +132,13 @@ M.swap_mode_highlight = function(mode, active, scene_name)
 end
 
 M.define_highlight_groups = function(mode)
-	mode = utils.titlecase(mode)
 	local bg_def = { bg = colors[mode:lower()] }
+	local fg_def = { fg = colors[mode:lower()] }
+	mode = utils.titlecase(mode)
 	local mode_highlight_name = ('Modes%s'):format(mode)
 	utils.set_hl(mode_highlight_name, bg_def)
 
-	if mode == 'Insert' then
-		utils.set_hl('ModesInsertModeMsg', { fg = colors.insert })
-	elseif mode == 'Change' then
-		utils.set_hl('ModesChangeModeMsg', { fg = colors.change })
-	elseif mode == 'Visual' then
-		utils.set_hl('ModesVisualModeMsg', { fg = colors.visual })
+	if mode == 'Visual' then
 		if
 			highlight_groups_colors.Cursorline ~= nil
 			and highlight_groups_colors.Cursorline.bg_colors ~= nil
@@ -431,17 +415,25 @@ M.setup = function(opts)
 		end
 
 		-- for capslock.nvim support
-		if current_mode == 'i' then
-			if capslock and capslock.enabled(current_mode) then
-				M.swap_mode_highlight('insert', true, config.capslock.color)
-				M.highlight('insert_capslock')
-			elseif in_change_mode then
-				M.swap_mode_highlight('insert', true, 'change')
-				M.highlight('insert')
-			else
-				M.swap_mode_highlight('insert', false)
-				M.highlight('insert')
-			end
+		if key ~= utils.get_termcode('<esc>') then
+			vim.defer_fn(function()
+				if current_mode == 'i' then
+					if capslock and capslock.enabled(current_mode) then
+						M.swap_mode_highlight(
+							'insert',
+							true,
+							config.capslock.color
+						)
+						M.highlight('insert_capslock')
+					elseif in_change_mode then
+						M.swap_mode_highlight('insert', true, 'change')
+						M.highlight('insert')
+					else
+						M.swap_mode_highlight('insert', false)
+						M.highlight('insert')
+					end
+				end
+			end, 0)
 		end
 	end)
 
