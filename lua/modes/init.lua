@@ -44,16 +44,12 @@ M.highlight = function(scene_event)
 	local scene_name = scene_event
 	if scene_event == 'char_replace' then
 		scene_name = 'replace'
-	-- elseif scene_event == 'insert' and in_change_mode then
-	-- 	scene_name = 'change'
 	elseif scene_event == 'insert_capslock' then
 		scene_name = config.capslock.color
 	end
 
 	-- set showmoe message colors in command line section, like --Insert-- or --Visual--
-	if
-		vim.api.nvim_get_option('showmode') -- and scene_name == 'insert'
-	then
+	if vim.api.nvim_get_option('showmode') then
 		utils.set_hl('ModeMsg', { fg = colors[scene_name] })
 	end
 
