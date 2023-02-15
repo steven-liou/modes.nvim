@@ -5,6 +5,7 @@ local diagnostics = require('modes.diagnostics')
 local todos = require('modes.todos')
 local aerial = require('modes.aerial')
 local bufferline = require('modes.bufferline')
+local capslock = nil
 local reset_delay = 500
 local reset_timer = nil
 local in_change_mode = false
@@ -27,7 +28,7 @@ M.reset = function()
 		return
 	end
 	M.highlight('normal')
-	M.swap_insert_highlight()
+	M.swap_mode_highlight('insert', false)
 	reset_timer = nil
 	operator_started = false
 end
@@ -45,6 +46,9 @@ M.highlight = function(scene_event)
 		scene_name = 'replace'
 	elseif scene_event == 'insert' and in_change_mode then
 		scene_name = 'change'
+	elseif scene_event == 'insert_capslock' then
+		print(('Modes%s'):format(utils.titlecase(config.capslock.color)))
+		scene_name = 'insert'
 	end
 
 	-- set showmoe message colors in command line section, like --Insert-- or --Visual--
@@ -79,6 +83,12 @@ M.highlight = function(scene_event)
 			utils.set_hl('ModesNormalCursor', { link = 'ModesUndo' })
 		elseif scene_event == 'redo' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesRedo' })
+		elseif scene_event == 'insert_capslock' then
+			utils.set_hl('ModesInsert', {
+				link = ('Modes%s'):format(
+					utils.titlecase(config.capslock.color)
+				),
+			})
 		end
 	end
 
@@ -103,34 +113,38 @@ M.highlight = function(scene_event)
 	todos.highlight(config, scene_name)
 end
 
-M.swap_insert_highlight = function()
-	if in_change_mode then
-		colors.insert = colors.change
+M.swap_mode_highlight = function(mode, active, scene_name)
+	if active then
+		colors[mode] = colors[scene_name]
 		for _, group_colors in pairs(highlight_groups_colors) do
 			if group_colors.fg_colors ~= nil then
-				group_colors.fg_colors.insert = group_colors.fg_colors.change
+				group_colors.fg_colors[mode] =
+					group_colors.fg_colors[scene_name]
 			end
 			if group_colors.bg_colors ~= nil then
-				group_colors.bg_colors.insert = group_colors.bg_colors.change
+				group_colors.bg_colors[mode] =
+					group_colors.bg_colors[scene_name]
 			end
 		end
 	else
-		colors.insert = colors.original_insert
+		local original_mode = ('original_%s'):format(mode)
+		colors[mode] = colors[original_mode]
 		for _, group_colors in pairs(highlight_groups_colors) do
 			if group_colors.fg_colors ~= nil then
-				group_colors.fg_colors.insert =
-					group_colors.fg_colors.original_insert
+				group_colors.fg_colors[mode] =
+					group_colors.fg_colors[original_mode]
 			end
 			if group_colors.bg_colors ~= nil then
-				group_colors.bg_colors.insert =
-					group_colors.bg_colors.original_insert
+				group_colors.bg_colors[mode] =
+					group_colors.bg_colors[original_mode]
 			end
 		end
 	end
-	M.define_highlight_groups('Insert')
+	M.define_highlight_groups(mode)
 end
 
 M.define_highlight_groups = function(mode)
+	mode = utils.titlecase(mode)
 	local bg_def = { bg = colors[mode:lower()] }
 	local mode_highlight_name = ('Modes%s'):format(mode)
 	utils.set_hl(mode_highlight_name, bg_def)
@@ -249,6 +263,10 @@ M.define = function()
 	todos.define(config)
 	aerial.define(config)
 	bufferline.define(config)
+
+	if config.capslock and config.capslock.enabled then
+		capslock = require('capslock')
+	end
 end
 
 local group = vim.api.nvim_create_augroup('NvimModesCursor', { clear = true })
@@ -369,7 +387,7 @@ M.setup = function(opts)
 
 			if key == 'c' then
 				in_change_mode = true
-				M.swap_insert_highlight()
+				M.swap_mode_highlight('insert', in_change_mode, 'change')
 				M.highlight('change')
 				operator_started = true
 				delay_oprator_reset()
@@ -409,6 +427,20 @@ M.setup = function(opts)
 				M.highlight('pending')
 				operator_started = true
 				return
+			end
+		end
+
+		-- for capslock.nvim support
+		if current_mode == 'i' then
+			if capslock and capslock.enabled(current_mode) then
+				M.swap_mode_highlight('insert', true, config.capslock.color)
+				M.highlight('insert_capslock')
+			elseif in_change_mode then
+				M.swap_mode_highlight('insert', true, 'change')
+				M.highlight('insert')
+			else
+				M.swap_mode_highlight('insert', false)
+				M.highlight('insert')
 			end
 		end
 	end)

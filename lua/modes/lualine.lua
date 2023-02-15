@@ -90,6 +90,8 @@ M.highlight = function(config, scene_event, scene_name)
 		or scene_event == 'change'
 	then
 		scene_event = 'normal'
+	elseif scene_event == 'insert_capslock' then
+		scene_event = 'insert'
 	end
 
 	local colors = config.colors
