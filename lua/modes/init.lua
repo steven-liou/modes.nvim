@@ -17,7 +17,9 @@ local default_config = {
 	ignore_filetypes = { 'NvimTree', 'TelescopePrompt' },
 }
 local colors = {}
-local highlight_groups_colors = {}
+local modes_highlight_groups = {}
+
+local modes_highlight_groups_colors = {}
 local operator_started = false
 local in_ignored_buffer = function()
 	return vim.tbl_contains(config.ignore_filetypes, vim.bo.filetype)
@@ -27,19 +29,18 @@ M.reset = function()
 	if in_change_mode then
 		return
 	end
-	M.highlight('normal')
 	M.swap_mode_highlight('insert', false)
-	M.swap_mode_highlight('command', false)
 
 	if reset_timer then
 		reset_timer:stop()
 	end
 	reset_timer = nil
 	operator_started = false
+	M.highlight('normal')
 end
 
 ---Update highlights
----@param scene_event 'normal'|'insert'|'change'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'char_replace' | 'pending' | 'undo' | 'redo'
+---@param scene_event 'normal'|'insert'|'change'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'char_replace' | 'pending' | 'undo' | 'redo' | 'command_capslock'|'insert_capslock'
 M.highlight = function(scene_event)
 	if in_ignored_buffer() then
 		return
@@ -49,10 +50,7 @@ M.highlight = function(scene_event)
 	local scene_name = scene_event
 	if scene_event == 'char_replace' then
 		scene_name = 'replace'
-	elseif
-		scene_event == 'insert_capslock'
-		or scene_event == 'command_capslock'
-	then
+	elseif scene_event == 'insert_capslock' then
 		scene_name = config.capslock.color
 	end
 
@@ -62,37 +60,46 @@ M.highlight = function(scene_event)
 	end
 
 	-- link cursor colors for operator and normal modes
+	local bg_def = { bg = colors[scene_name] }
 	if config.set_cursor then
 		if scene_event == 'normal' then
-			utils.set_hl('ModesNormalCursor', { link = 'ModesNormal' })
-		elseif scene_event == 'delete' then
-			utils.set_hl('ModesOperatorCursor', { link = 'ModesDelete' })
-			utils.set_hl('ModesNormalCursor', { link = 'ModesDelete' })
+			utils.set_hl('ModesNormalCursor', bg_def)
 		elseif scene_event == 'change' then
-			utils.set_hl('ModesOperatorCursor', { link = 'ModesChange' })
-			utils.set_hl('ModesNormalCursor', { link = 'ModesChange' })
-			utils.set_hl('ModeMsg', { fg = colors[scene_name] })
+			utils.set_hl('ModesOperatorCursor', bg_def)
+			utils.set_hl('ModesNormalCursor', bg_def)
+			utils.set_hl('ModesInsertCursor', bg_def)
+		elseif scene_event == 'command' then
+			utils.set_hl('ModesCommandCursor', bg_def)
 		elseif scene_event == 'copy' then
-			utils.set_hl('ModesNormalCursor', { link = 'ModesCopy' })
-			utils.set_hl('ModesOperatorCursor', { link = 'ModesCopy' })
+			utils.set_hl('ModesNormalCursor', bg_def)
+			utils.set_hl('ModesOperatorCursor', bg_def)
+		elseif scene_event == 'delete' then
+			utils.set_hl('ModesOperatorCursor', bg_def)
+			utils.set_hl('ModesNormalCursor', bg_def)
+		elseif scene_event == 'insert' or scene_event == 'insert_capslock' then
+			utils.set_hl('ModesInsertCursor', bg_def)
 		elseif scene_event == 'pending' then
-			utils.set_hl('ModesOperatorCursor', { link = 'ModesPending' })
+			utils.set_hl('ModesOperatorCursor', bg_def)
 		elseif scene_event == 'undo' then
-			utils.set_hl('ModesNormalCursor', { link = 'ModesUndo' })
+			utils.set_hl('ModesNormalCursor', bg_def)
 		elseif scene_event == 'redo' then
-			utils.set_hl('ModesNormalCursor', { link = 'ModesRedo' })
+			utils.set_hl('ModesNormalCursor', bg_def)
+		elseif scene_event == 'visual' then
+			utils.set_hl('ModesVisualCursor', bg_def)
 		end
 	end
 
 	-- set highlight groups
-	for hl_group, settings in pairs(config.highlight_groups) do
+	for hl_group, settings in pairs(modes_highlight_groups) do
 		local hl_def = {}
 		if settings.fg and settings.fg.enabled then
-			hl_def.fg = highlight_groups_colors[hl_group].fg_colors[scene_name]
+			hl_def.fg =
+				modes_highlight_groups_colors[hl_group].fg_colors[scene_name]
 		end
 
 		if settings.bg and settings.bg.enabled then
-			hl_def.bg = highlight_groups_colors[hl_group].bg_colors[scene_name]
+			hl_def.bg =
+				modes_highlight_groups_colors[hl_group].bg_colors[scene_name]
 		end
 		utils.set_hl(hl_group, hl_def)
 	end
@@ -110,8 +117,6 @@ M.highlight = function(scene_event)
 		scene_event = 'normal'
 	elseif scene_event == 'insert_capslock' then
 		scene_event = 'insert'
-	elseif scene_event == 'command_capslock' then
-		scene_event = 'command'
 	end
 	lualine.highlight(config, scene_event, scene_name)
 	aerial.highlight(config, scene_event, scene_name)
@@ -123,7 +128,7 @@ end
 
 M.swap_mode_highlight = function(mode, active, scene_name)
 	local original_mode = ('original_%s'):format(mode)
-	for _, group_colors in pairs(highlight_groups_colors) do
+	for _, group_colors in pairs(modes_highlight_groups_colors) do
 		if
 			group_colors.fg_colors
 			and group_colors.fg_colors[original_mode] == nil
@@ -140,7 +145,7 @@ M.swap_mode_highlight = function(mode, active, scene_name)
 
 	if active then
 		colors[mode] = colors[scene_name]
-		for _, group_colors in pairs(highlight_groups_colors) do
+		for _, group_colors in pairs(modes_highlight_groups_colors) do
 			if group_colors.fg_colors ~= nil then
 				group_colors.fg_colors[mode] =
 					group_colors.fg_colors[scene_name]
@@ -152,7 +157,7 @@ M.swap_mode_highlight = function(mode, active, scene_name)
 		end
 	else
 		colors[mode] = colors[original_mode]
-		for _, group_colors in pairs(highlight_groups_colors) do
+		for _, group_colors in pairs(modes_highlight_groups_colors) do
 			if group_colors.fg_colors ~= nil then
 				group_colors.fg_colors[mode] =
 					group_colors.fg_colors[original_mode]
@@ -163,26 +168,13 @@ M.swap_mode_highlight = function(mode, active, scene_name)
 			end
 		end
 	end
-	M.define_highlight_groups(mode)
 end
 
-M.define_highlight_groups = function(mode)
+M.define_modes_background_highlight = function(mode)
 	local bg_def = { bg = colors[mode:lower()] }
-	local fg_def = { fg = colors[mode:lower()] }
 	mode = utils.titlecase(mode)
 	local mode_highlight_name = ('Modes%s'):format(mode)
 	utils.set_hl(mode_highlight_name, bg_def)
-
-	if mode == 'Visual' then
-		if
-			highlight_groups_colors.Cursorline ~= nil
-			and highlight_groups_colors.Cursorline.bg_colors ~= nil
-		then
-			utils.set_hl('Visual', {
-				bg = highlight_groups_colors.Cursorline.bg_colors.visual,
-			})
-		end
-	end
 end
 
 M.define = function()
@@ -236,13 +228,20 @@ M.define = function()
 			else
 				hl_group_colors.bg_colors = colors
 			end
-			-- hl_group_colors.bg_colors.original_insert =
-			-- 	hl_group_colors.bg_colors.insert
 		end
-		highlight_groups_colors[hl_group] = hl_group_colors
+		-- create highlight groups that start with Modes and link original color to new groups
+		local modes_group = hl_group
+		if hl_group ~= 'NvimSeparator' then -- just override highlight group names for these groups and don't prepend Modes-
+			modes_group = ('Modes%s'):format(hl_group)
+		end
+		utils.set_hl(modes_group)
+		utils.set_hl(hl_group, { link = modes_group })
+
+		modes_highlight_groups_colors[modes_group] = hl_group_colors
+		modes_highlight_groups[modes_group] = config.highlight_groups[hl_group]
 	end
 
-	config.highlight_groups_colors = highlight_groups_colors
+	-- config.modes_highlight_groups_colors = modes_highlight_groups_colors
 
 	---Create highlight groups
 	for _, mode in ipairs({
@@ -258,7 +257,7 @@ M.define = function()
 		'Redo',
 		'Change',
 	}) do
-		M.define_highlight_groups(mode)
+		M.define_modes_background_highlight(mode)
 	end
 
 	if config.set_yanked_background then
@@ -269,10 +268,9 @@ M.define = function()
 		})
 
 		if config.set_yanked_background then
-			utils.set_hl(
-				'TextYanked',
-				{ bg = highlight_groups_colors.Cursorline.bg_colors.copy }
-			)
+			utils.set_hl('TextYanked', {
+				bg = modes_highlight_groups_colors.ModesCursorline.bg_colors.copy,
+			})
 		end
 	end
 
@@ -288,7 +286,8 @@ M.define = function()
 	end
 end
 
-local group = vim.api.nvim_create_augroup('NvimModesCursor', { clear = true })
+local modes_cursor_group =
+	vim.api.nvim_create_augroup('NvimModesCursor', { clear = true })
 local block_cursor_timer
 
 local function block_insert()
@@ -296,14 +295,14 @@ local function block_insert()
 		block_cursor_timer:stop()
 	end
 	block_cursor_timer = vim.defer_fn(function()
-		vim.cmd([[execute 'set guicursor-=i:ver10-ModesInsert']])
-		vim.cmd([[execute 'set guicursor+=i:block-ModesInsert']])
+		vim.cmd([[execute 'set guicursor-=i:ver10-ModesInsertCursor']])
+		vim.cmd([[execute 'set guicursor+=i:block-ModesInsertCursor']])
 	end, 1000)
 end
 
 local function vertline_insert()
-	vim.cmd([[execute 'set guicursor-=i:block-ModesInsert']])
-	vim.cmd([[execute 'set guicursor+=i:ver10-ModesInsert']])
+	vim.cmd([[execute 'set guicursor-=i:block-ModesInsertCursor']])
+	vim.cmd([[execute 'set guicursor+=i:ver10-ModesInsertCursor']])
 end
 
 M.enable_managed_ui = function()
@@ -313,21 +312,21 @@ M.enable_managed_ui = function()
 
 	if config.set_cursor then
 		vim.opt.guicursor:append('n:block-ModesNormalCursor')
-		vim.opt.guicursor:append('v-sm:block-ModesVisual')
-		vim.opt.guicursor:append('i-ci-ve:ver25-ModesInsert')
+		vim.opt.guicursor:append('v-sm:block-ModesVisualCursor')
+		vim.opt.guicursor:append('i-ci-ve:ver25-ModesInsertCursor')
 		vim.opt.guicursor:append('o:block-ModesOperatorCursor')
-		vim.opt.guicursor:append('r:hor20-ModesReplace')
-		vim.opt.guicursor:append('c:block-ModesCommand')
+		vim.opt.guicursor:append('r:hor20-ModesReplaceCursor')
+		vim.opt.guicursor:append('c:block-ModesCommandCursor')
 
 		vim.api.nvim_create_autocmd('CursorHoldI', {
 			callback = block_insert,
-			group = group,
+			group = modes_cursor_group,
 			desc = 'Insert mode block cursor on hold',
 		})
 
 		vim.api.nvim_create_autocmd('CursorMovedI', {
 			callback = vertline_insert,
-			group = group,
+			group = modes_cursor_group,
 			desc = 'Insert mode vertical line cursor on type',
 		})
 	end
@@ -349,7 +348,7 @@ M.disable_managed_ui = function()
 		vim.opt.guicursor:remove('o:block-ModesOperatorCursor')
 		vim.opt.guicursor:remove('r:hor20-ModesReplace')
 		vim.opt.guicursor:remove('c:block-ModesCommand')
-		vim.api.nvim_clear_autocmds({ group = group })
+		vim.api.nvim_clear_autocmds({ group = modes_cursor_group })
 	end
 
 	vim.opt.cursorline = false
@@ -467,18 +466,6 @@ M.setup = function(opts)
 					else
 						M.swap_mode_highlight('insert', false)
 						M.highlight('insert')
-					end
-				elseif current_mode == 'c' then
-					if capslock and capslock.enabled(current_mode) then
-						M.swap_mode_highlight(
-							'command',
-							true,
-							config.capslock.color
-						)
-						M.highlight('command_capslock')
-					else
-						M.swap_mode_highlight('command', false)
-						M.highlight('command')
 					end
 				end
 			end, 0)

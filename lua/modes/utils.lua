@@ -52,6 +52,9 @@ end
 ---@param name string
 ---@param color Color
 M.set_hl = function(name, color)
+	if color == nil then
+		color = {}
+	end
 	name = name:gsub('-', '_')
 	if color.link ~= nil then
 		vim.cmd('hi ' .. name .. ' guibg=none guifg=none')
@@ -63,7 +66,7 @@ M.set_hl = function(name, color)
 	local fg = color.fg or 'none'
 	local gui = color.gui or 'none'
 
-	local cmd = 'hi '
+	local cmd = 'hi! '
 		.. name
 		.. ' guibg='
 		.. bg
