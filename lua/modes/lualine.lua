@@ -80,20 +80,6 @@ M.highlight = function(config, scene_event, scene_name)
 		return
 	end
 
-	if
-		scene_event == 'copy'
-		or scene_event == 'delete'
-		or scene_event == 'pending'
-		or scene_event == 'char_replace'
-		or scene_event == 'undo'
-		or scene_event == 'redo'
-		or scene_event == 'change'
-	then
-		scene_event = 'normal'
-	elseif scene_event == 'insert_capslock' then
-		scene_event = 'insert'
-	end
-
 	local colors = config.colors
 	local lualine = config.lualine
 	local fg_def =

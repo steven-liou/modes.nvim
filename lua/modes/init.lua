@@ -29,6 +29,11 @@ M.reset = function()
 	end
 	M.highlight('normal')
 	M.swap_mode_highlight('insert', false)
+	M.swap_mode_highlight('command', false)
+
+	if reset_timer then
+		reset_timer:stop()
+	end
 	reset_timer = nil
 	operator_started = false
 end
@@ -44,7 +49,10 @@ M.highlight = function(scene_event)
 	local scene_name = scene_event
 	if scene_event == 'char_replace' then
 		scene_name = 'replace'
-	elseif scene_event == 'insert_capslock' then
+	elseif
+		scene_event == 'insert_capslock'
+		or scene_event == 'command_capslock'
+	then
 		scene_name = config.capslock.color
 	end
 
@@ -89,6 +97,22 @@ M.highlight = function(scene_event)
 		utils.set_hl(hl_group, hl_def)
 	end
 
+	-- reset scene_event for lualine
+	if
+		scene_event == 'copy'
+		or scene_event == 'delete'
+		or scene_event == 'pending'
+		or scene_event == 'char_replace'
+		or scene_event == 'undo'
+		or scene_event == 'redo'
+		or scene_event == 'change'
+	then
+		scene_event = 'normal'
+	elseif scene_event == 'insert_capslock' then
+		scene_event = 'insert'
+	elseif scene_event == 'command_capslock' then
+		scene_event = 'command'
+	end
 	lualine.highlight(config, scene_event, scene_name)
 	aerial.highlight(config, scene_event, scene_name)
 	bufferline.highlight(config, scene_name)
@@ -98,6 +122,22 @@ M.highlight = function(scene_event)
 end
 
 M.swap_mode_highlight = function(mode, active, scene_name)
+	local original_mode = ('original_%s'):format(mode)
+	for _, group_colors in pairs(highlight_groups_colors) do
+		if
+			group_colors.fg_colors
+			and group_colors.fg_colors[original_mode] == nil
+		then
+			group_colors.fg_colors[original_mode] = group_colors.fg_colors[mode]
+		end
+		if
+			group_colors.bg_colors
+			and group_colors.bg_colors[original_mode] == nil
+		then
+			group_colors.bg_colors[original_mode] = group_colors.bg_colors[mode]
+		end
+	end
+
 	if active then
 		colors[mode] = colors[scene_name]
 		for _, group_colors in pairs(highlight_groups_colors) do
@@ -111,7 +151,6 @@ M.swap_mode_highlight = function(mode, active, scene_name)
 			end
 		end
 	else
-		local original_mode = ('original_%s'):format(mode)
 		colors[mode] = colors[original_mode]
 		for _, group_colors in pairs(highlight_groups_colors) do
 			if group_colors.fg_colors ~= nil then
@@ -166,7 +205,7 @@ M.define = function()
 		redo = config.colors.redo or utils.get_bg('ModesRedo', '#9745be'),
 	}
 
-	colors.original_insert = colors.insert
+	-- colors.original_insert = colors.insert
 	config.colors = colors
 
 	-- create highlight groups colors
@@ -197,8 +236,8 @@ M.define = function()
 			else
 				hl_group_colors.bg_colors = colors
 			end
-			hl_group_colors.bg_colors.original_insert =
-				hl_group_colors.bg_colors.insert
+			-- hl_group_colors.bg_colors.original_insert =
+			-- 	hl_group_colors.bg_colors.insert
 		end
 		highlight_groups_colors[hl_group] = hl_group_colors
 	end
@@ -353,6 +392,7 @@ M.setup = function(opts)
 		if key == utils.get_termcode('<esc>') then
 			in_change_mode = false
 			M.reset()
+			return
 		end
 
 		if current_mode == 'n' then
@@ -427,6 +467,18 @@ M.setup = function(opts)
 					else
 						M.swap_mode_highlight('insert', false)
 						M.highlight('insert')
+					end
+				elseif current_mode == 'c' then
+					if capslock and capslock.enabled(current_mode) then
+						M.swap_mode_highlight(
+							'command',
+							true,
+							config.capslock.color
+						)
+						M.highlight('command_capslock')
+					else
+						M.swap_mode_highlight('command', false)
+						M.highlight('command')
 					end
 				end
 			end, 0)

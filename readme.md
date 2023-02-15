@@ -42,22 +42,34 @@ require("modes").setup({
 		redo = "#9745be",
 	},
 
-	-- Cursorline highlight opacity
-	cursorline = {
-		enabled = true,
-		opacity = {
-			normal = 0.1,
-			insert = 0.1,
-			change = 0.1,
-			visual = 0.1,
-			replace = 0.1,
-			command = 0.1,
-			pending = 0.1,
-			copy = 0.1,
-			delete = 0.1,
-			undo = 0.1,
-			redo = 0.1,
+    -- For highlight groups you wish to change the colors based on modes
+	highlight_groups = {
+		NvimSeparator = { fg = { enabled = true, opacity = 0.2 } }, -- for colorful-winsep.nvim
+		IndentBlanklineContext = { fg = { enabled = true } }, -- for indent-blankline.nvim
+		VirtColumn = { fg = { enabled = true, opacity = 0.2 } }, -- for virt-column.nvim
+		MatchArea = { bg = { enabled = true, opacity = 0.1 } }, -- for hl_match_area.nvim
+		Cursorline = {
+			bg = {
+				enabled = true,
+				opacity = {
+					normal = 0.08,
+					insert = 0.08,
+					change = 0.1,
+					visual = 0.1,
+					replace = 0.1,
+					command = 0.1,
+					pending = 0.1,
+					copy = 0.1,
+					delete = 0.1,
+					undo = 0.1,
+					redo = 0.1,
+				},
+			},
 		},
+		CursorLineNr = { fg = { enabled = true }, bg = { enabled = true, opacity = 0.1 } },
+		CursorLineSign = { fg = { enabled = true }, bg = { enabled = true, opacity = 0.1 } },
+		CursorLineFold = { bg = { enabled = true, opacity = 0.1 } },
+		FloatBorder = { fg = { enabled = true, opacity = 0.4 } },
 	},
 
 	-- Highlight cursor
@@ -104,8 +116,8 @@ require("modes").setup({
     -- Highlight bufferline.nvim
 	bufferline = {
 		enabled = true,
-		background_color = colors.shade_black,
-		fill_color = colors.black,
+		background_color = "#1e1e1e",
+		fill_color = "#1e1e1e",
 		opacity = {
 			normal = 0.08,
 			copy = 0.08,
@@ -121,13 +133,30 @@ require("modes").setup({
 		},
 	},
 
-    -- For additional highlight groups you wish to change the colors based on modes
-	additional_highlight_groups = {
-		NvimSeparator = { fg = { enabled = true, opacity = 0.2 } }, -- for colorful-winsep.nvim
-		IndentBlanklineContext = { fg = { enabled = true } }, -- for indent-blankline.nvim
-		VirtColumn = { fg = { enabled = true, opacity = 0.2 } }, -- for virt-column.nvim
-		MatchArea = { bg = { enabled = true, opacity = 0.1 } }, -- for hl_match_area.nvim
-		FloatBorder = { fg = { enabled = true, opacity = 0.4 } },
+    -- for gitsigns.nvim support
+	gitsigns = {
+		enabled = true,
+		opacity = 0.08,
+	},
+
+    -- for nvim-lspconfig lsp diagnostics support
+	diagnostic_signs = {
+		enabled = true,
+		opacity = 0.1,
+	},
+
+	todos_comment = {
+		enabled = true,
+		comment_types = { "FIX", "HACK", "NOTE", "PERF", "TEST", "TODO", "WARN" },
+		opacity = 0.1,
+	},
+
+
+	-- for capslock.nvim
+	capslock = {
+		enabled = true,
+		color = "undo", -- color name based on one of the colors definition key above, like "norma", "insert", "visual"...
+		opacity = 0.1,
 	},
 
 	-- Highlight in active window only
