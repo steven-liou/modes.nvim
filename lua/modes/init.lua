@@ -241,8 +241,6 @@ M.define = function()
 		modes_highlight_groups[modes_group] = config.highlight_groups[hl_group]
 	end
 
-	-- config.modes_highlight_groups_colors = modes_highlight_groups_colors
-
 	---Create highlight groups
 	for _, mode in ipairs({
 		'Normal',
@@ -429,7 +427,7 @@ M.setup = function(opts)
 				return
 			end
 
-			if key == 'r' then
+			if key == 'r' or key == '~' then
 				M.highlight('char_replace')
 				operator_started = true
 				delay_oprator_reset()
@@ -444,7 +442,6 @@ M.setup = function(opts)
 
 			if key == '@' then
 				M.highlight('pending')
-				operator_started = true
 				return
 			end
 		end
@@ -511,6 +508,18 @@ M.setup = function(opts)
 		pattern = 'n:r',
 		callback = function()
 			M.highlight('replace')
+		end,
+	})
+
+	-- set operator mode
+	vim.api.nvim_create_autocmd('ModeChanged', {
+		pattern = 'n:no',
+		callback = function()
+			if operator_started then
+				return
+			end
+			M.highlight('pending')
+			delay_oprator_reset()
 		end,
 	})
 
