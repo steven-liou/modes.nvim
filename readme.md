@@ -44,10 +44,6 @@ require("modes").setup({
 
     -- For highlight groups you wish to change the colors based on modes
 	highlight_groups = {
-		NvimSeparator = { fg = { enabled = true, opacity = 0.2 } }, -- for colorful-winsep.nvim
-		IndentBlanklineContext = { fg = { enabled = true } }, -- for indent-blankline.nvim
-		VirtColumn = { fg = { enabled = true, opacity = 0.2 } }, -- for virt-column.nvim
-		MatchArea = { bg = { enabled = true, opacity = 0.1 } }, -- for hl_match_area.nvim
 		Cursorline = {
 			bg = {
 				enabled = true,
@@ -70,6 +66,16 @@ require("modes").setup({
 		CursorLineSign = { fg = { enabled = true }, bg = { enabled = true, opacity = 0.1 } },
 		CursorLineFold = { bg = { enabled = true, opacity = 0.1 } },
 		FloatBorder = { fg = { enabled = true, opacity = 0.4 } },
+		NvimSeparator = { fg = { enabled = true, opacity = 0.2 } }, -- for colorful-winsep.nvim
+		IndentBlanklineContext = { fg = { enabled = true } }, -- for indent-blankline.nvim
+		VirtColumn = { fg = { enabled = true, opacity = 0.2 } }, -- for virt-column.nvim
+		MatchArea = { bg = { enabled = true, opacity = 0.1 } }, -- for hl_match_area.nvim
+		IndentBlanklineIndent1 = { fg = { enabled = true, opacity = 0.5 } }, -- for indent-blankline.nvim
+		IndentBlanklineIndent2 = { fg = { enabled = true, opacity = 0.5 } }, -- for indent-blankline.nvim
+		IndentBlanklineIndent3 = { fg = { enabled = true, opacity = 0.5 } }, -- for indent-blankline.nvim
+		IndentBlanklineIndent4 = { fg = { enabled = true, opacity = 0.5 } }, -- for indent-blankline.nvim
+		IndentBlanklineIndent5 = { fg = { enabled = true, opacity = 0.5 } }, -- for indent-blankline.nvim
+		IndentBlanklineIndent6 = { fg = { enabled = true, opacity = 0.5 } }, -- for indent-blankline.nvim
 	},
 
 	-- Highlight cursor
