@@ -269,7 +269,6 @@ M.define = function()
 		local cmd = ([[silent! lua require'vim.highlight'.on_yank({higroup="TextYanked", timeout = %s})]]):format(
 			config.set_yanked_background.timeout
 		)
-		print(cmd)
 
 		vim.api.nvim_create_autocmd('TextYankPost', {
 			pattern = '*',
