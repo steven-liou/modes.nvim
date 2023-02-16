@@ -82,7 +82,8 @@ require("modes").setup({
 	set_cursor = true,
 	-- Enable line number highlights to match cursorline
 	set_number = true,
-	set_yanked_background = true,
+    set_yanked_background = { enabled = true, timeout = 2000 },
+
 
 	-- Highlight lualine
 	lualine = {
