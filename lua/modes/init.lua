@@ -89,6 +89,8 @@ M.highlight = function(scene_event)
 			utils.set_hl('ModesReplaceCursor', { link = 'ModesReplace' })
 		elseif scene_event == 'visual' then
 			utils.set_hl('ModesVisualCursor', { link = 'ModesVisual' })
+		elseif scene_event == 'search' then
+			utils.set_hl('ModesCommandCursor', { link = 'ModesSearch' })
 		end
 	end
 
@@ -122,6 +124,8 @@ M.highlight = function(scene_event)
 		scene_event = 'normal'
 	elseif scene_event == 'insert_capslock' then
 		scene_event = 'insert'
+	elseif scene_event == 'search' then
+		scene_event = 'command'
 	end
 	lualine.highlight(config, scene_event, scene_name)
 	aerial.highlight(config, scene_event, scene_name)
@@ -200,6 +204,7 @@ M.define = function()
 			or utils.get_bg('ModesReplace', '#e3a5a5'),
 		undo = config.colors.undo or utils.get_bg('ModesUndo', '#9745be'),
 		redo = config.colors.redo or utils.get_bg('ModesRedo', '#9745be'),
+		search = config.colors.search or utils.get_bg('ModesSearch', '#deb974'),
 	}
 	if config.capslock and config.capslock.enabled then
 		capslock = require('capslock')
@@ -261,6 +266,7 @@ M.define = function()
 		'Redo',
 		'Change',
 		'Capslock',
+		'Search',
 	}) do
 		M.define_modes_background_highlight(mode)
 	end
@@ -446,8 +452,13 @@ M.setup = function(opts)
 				return
 			end
 
-			if key == ':' or key == '/' then
+			if key == ':' then
 				M.highlight('command')
+				operator_started = true
+				return
+			end
+			if key == '/' then
+				M.highlight('search')
 				operator_started = true
 				return
 			end
