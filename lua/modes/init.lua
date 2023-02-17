@@ -55,7 +55,8 @@ M.highlight = function(scene_event)
 
 	-- set showmoe message colors in command line section, like --Insert-- or --Visual--
 	if vim.api.nvim_get_option('showmode') then
-		utils.set_hl('ModeMsg', { fg = colors[scene_name] })
+		utils.set_hl('ModesModeMsg', { fg = colors[scene_name] })
+		utils.set_hl('ModeMsg', { link = 'ModesModeMsg' })
 	end
 
 	-- link cursor colors for operator and normal modes
@@ -471,9 +472,13 @@ M.setup = function(opts)
 
 		-- for capslock.nvim support
 		if key ~= utils.get_termcode('<esc>') then
+			if not capslock then
+				return
+			end
+
 			vim.defer_fn(function()
 				if current_mode == 'i' then
-					if capslock and capslock.enabled(current_mode) then
+					if capslock.enabled(current_mode) then
 						M.swap_mode_highlight(
 							'insert',
 							true,
