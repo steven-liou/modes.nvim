@@ -49,7 +49,10 @@ M.highlight = function(scene_event)
 	local scene_name = scene_event
 	if scene_event == 'char_replace' then
 		scene_name = 'replace'
-	elseif scene_event == 'insert_capslock' then
+	elseif
+		scene_event == 'insert_capslock'
+		or scene_event == 'command_capslock'
+	then
 		scene_name = config.capslock.color
 	end
 
@@ -70,6 +73,8 @@ M.highlight = function(scene_event)
 			utils.set_hl('ModesInsertCursor', { link = 'ModesChange' })
 		elseif scene_event == 'command' then
 			utils.set_hl('ModesCommandCursor', { link = 'ModesCommand' })
+		elseif scene_event == 'command_capslock' then
+			utils.set_hl('ModesCommandCursor', { link = 'ModesCapslock' })
 		elseif scene_event == 'copy' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesCopy' })
 			utils.set_hl('ModesOperatorCursor', { link = 'ModesCopy' })
@@ -125,7 +130,7 @@ M.highlight = function(scene_event)
 		scene_event = 'normal'
 	elseif scene_event == 'insert_capslock' then
 		scene_event = 'insert'
-	elseif scene_event == 'search' then
+	elseif scene_event == 'search' or scene_event == 'command_capslock' then
 		scene_event = 'command'
 	end
 	lualine.highlight(config, scene_event, scene_name)
@@ -469,32 +474,6 @@ M.setup = function(opts)
 				return
 			end
 		end
-
-		-- for capslock.nvim support
-		if key ~= utils.get_termcode('<esc>') then
-			if not capslock then
-				return
-			end
-
-			vim.defer_fn(function()
-				if current_mode == 'i' then
-					if capslock.enabled(current_mode) then
-						M.swap_mode_highlight(
-							'insert',
-							true,
-							config.capslock.color
-						)
-						M.highlight('insert_capslock')
-					elseif in_change_mode then
-						M.swap_mode_highlight('insert', true, 'change')
-						M.highlight('insert')
-					else
-						M.swap_mode_highlight('insert', false)
-						M.highlight('insert')
-					end
-				end
-			end, 0)
-		end
 	end)
 
 	---Set highlights when colorscheme changes
@@ -590,5 +569,44 @@ M.setup = function(opts)
 
 	M.reset()
 end
+
+vim.api.nvim_create_autocmd('User', {
+	pattern = 'CapslockOn',
+	callback = function()
+		local ok, current_mode = pcall(vim.fn.mode)
+		if not ok then
+			return
+		end
+		if current_mode == 'i' then
+			M.swap_mode_highlight('insert', true, config.capslock.color)
+			M.highlight('insert_capslock')
+		elseif current_mode == 'c' then
+			M.swap_mode_highlight('command', true, config.capslock.color)
+			M.highlight('command_capslock')
+		end
+	end,
+})
+
+vim.api.nvim_create_autocmd('User', {
+	pattern = 'CapslockOff',
+	callback = function()
+		local ok, current_mode = pcall(vim.fn.mode)
+		if not ok then
+			return
+		end
+		if current_mode == 'i' then
+			if in_change_mode then
+				M.swap_mode_highlight('insert', true, 'change')
+				M.highlight('insert')
+			else
+				M.swap_mode_highlight('insert', false)
+				M.highlight('insert')
+			end
+		elseif current_mode == 'c' then
+			M.swap_mode_highlight('command', false)
+			M.highlight('command')
+		end
+	end,
+})
 
 return M

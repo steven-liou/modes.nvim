@@ -6,14 +6,14 @@ local gitsigns_background_groups = {
 	'GitSignsAdd',
 	'GitSignsChange',
 	'GitSignsDelete',
-	'GitSignsUntracked',
+	'GitSignsCurrentLineBlame',
 }
 
 local gitsigns_foreground_groups = {
 	'GitSignsAddNr',
 	'GitSignsChangeNr',
 	'GitSignsDeleteNr',
-	'GitSignsUntrackedNr',
+	'GitSignsUntracked',
 }
 
 M.define = function(config)
