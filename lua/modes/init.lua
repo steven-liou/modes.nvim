@@ -5,7 +5,6 @@ local diagnostics = require('modes.diagnostics')
 local todos = require('modes.todos')
 local aerial = require('modes.aerial')
 local bufferline = require('modes.bufferline')
-local capslock = nil
 local reset_delay = 500
 local reset_timer = nil
 local in_change_mode = false
@@ -39,7 +38,7 @@ M.reset = function()
 end
 
 ---Update highlights
----@param scene_event 'normal'|'insert'|'change'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'char_replace' | 'pending' | 'undo' | 'redo' | 'command_capslock'|'insert_capslock'
+---@param scene_event 'normal'|'insert'|'change'|'visual'|'copy'|'delete'| 'command' | 'replace' | 'char_replace' | 'pending' | 'undo' | 'redo' | 'command_capslock'|'insert_capslock' | 'search'
 M.highlight = function(scene_event)
 	if in_ignored_buffer() then
 		return
@@ -463,15 +462,22 @@ M.setup = function(opts)
 				operator_started = true
 				return
 			end
-			if key == '/' then
+			if key == '/' and not operator_started then
 				M.highlight('search')
 				operator_started = true
 				return
 			end
 
-			if key == '@' then
+			if key == '@' and not operator_started then
 				M.highlight('pending')
+				operator_started = true
 				return
+			end
+		end
+
+		if current_mode == 'i' then
+			if key == '' then
+				M.highlight('normal')
 			end
 		end
 	end)
@@ -525,11 +531,12 @@ M.setup = function(opts)
 	vim.api.nvim_create_autocmd('ModeChanged', {
 		pattern = 'n:no',
 		callback = function()
-			if reset_timer then
+			if operator_started then
 				return
 			end
+			operator_started = true
 			M.highlight('pending')
-			delay_oprator_reset()
+			-- delay_oprator_reset()
 		end,
 	})
 
