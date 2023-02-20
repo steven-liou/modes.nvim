@@ -85,34 +85,37 @@ require("modes").setup({
     set_yanked_background = { enabled = true, timeout = 2000 },
 
 
-	-- Highlight lualine
+
+	-- for lualine.nvim
 	lualine = {
 		enabled = true,
 		statusbar_side_opacity = {
-			normal = 0.1,
+			normal = 0.2,
 			copy = 0.2,
+			delete = 0.2,
+			insert = 0.2,
+			visual = 0.2,
+			command = 0.2,
+			replace = 0.2,
+			pending = 0.2,
+			undo = 0.2,
+			redo = 0.2,
 			change = 0.2,
-			delete = 0.15,
-			insert = 0.10,
-			visual = 0.15,
-			command = 0.17,
-			replace = 0.15,
-			pending = 0.15,
-			undo = 0.15,
-			redo = 0.15,
+			search = 0.1,
 		},
 		statusbar_middle_opacity = {
 			normal = 0.08,
 			copy = 0.12,
-			delete = 0.12,
-			insert = 0.12,
-            change = 0.12,
+			delete = 0.15,
+			insert = 0.15,
 			visual = 0.12,
-			command = 0.12,
-			replace = 0.12,
-			pending = 0.12,
-			undo = 0.12,
-            redo = 0.12,
+			command = 0.1,
+			replace = 0.1,
+			pending = 0.1,
+			undo = 0.1,
+			redo = 0.1,
+			change = 0.1,
+			search = 0.1,
 		},
 		diff_component = "x",
 		diagnostics_component = "x",
@@ -120,49 +123,54 @@ require("modes").setup({
 		aerial_component = "c",
 	},
 
-    -- Highlight bufferline.nvim
+	-- for bufferline.nvim
 	bufferline = {
 		enabled = true,
-		background_color = "#1e1e1e",
-		fill_color = "#1e1e1e",
+		background_color = colors.shade_black,
+		fill_color = colors.black,
 		opacity = {
 			normal = 0.08,
 			copy = 0.08,
 			delete = 0.1,
 			insert = 0.06,
-            change = 0.08
 			visual = 0.1,
 			command = 0.1,
 			replace = 0.08,
 			pending = 0.09,
 			undo = 0.08,
-            redo = 0.08,
+			redo = 0.08,
+			change = 0.1,
+			search = 0.1,
 		},
 	},
 
-    -- for gitsigns.nvim support
+	-- for gitsigns.nvim
 	gitsigns = {
 		enabled = true,
 		opacity = 0.08,
 	},
-
-    -- for nvim-lspconfig lsp diagnostics support
+    -- for lsp diagnostic signs
 	diagnostic_signs = {
 		enabled = true,
 		opacity = 0.1,
 	},
 
+	-- for todo-comments.nvim
 	todos_comment = {
 		enabled = true,
 		comment_types = { "FIX", "HACK", "NOTE", "PERF", "TEST", "TODO", "WARN" },
 		opacity = 0.1,
 	},
 
+	-- for noice.nvim
+	noice = {
+		enabled = true,
+	},
 
 	-- for capslock.nvim
 	capslock = {
 		enabled = true,
-		color = "undo", -- color name based on one of the colors definition key above, like "norma", "insert", "visual"...
+		color = "undo", -- color name based on one of the colors definition key above, like "normal", "insert", "visual"...
 		opacity = 0.1,
 	},
 

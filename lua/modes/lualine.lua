@@ -4,7 +4,7 @@ local statusbar_middle_colors = {}
 local M = {}
 
 M.define = function(config)
-	if not config.lualine.enabled then
+	if not (config.lualine and config.lualine.enabled) then
 		return
 	end
 
@@ -76,7 +76,7 @@ local function set_diagnostics_component_highlight(lualine, colors, scene_name)
 end
 
 M.highlight = function(config, scene_event, scene_name)
-	if not config.lualine.enabled then
+	if not (config.lualine and config.lualine.enabled) then
 		return
 	end
 

@@ -4,6 +4,7 @@ local gitsigns = require('modes.gitsigns')
 local diagnostics = require('modes.diagnostics')
 local todos = require('modes.todos')
 local aerial = require('modes.aerial')
+local noice = require('modes.noice')
 local bufferline = require('modes.bufferline')
 local reset_delay = 500
 local reset_timer = nil
@@ -138,6 +139,7 @@ M.highlight = function(scene_event)
 	diagnostics.highlight(config, scene_name)
 	gitsigns.highlight(config, scene_name)
 	todos.highlight(config, scene_name)
+	noice.highlight(config, scene_name)
 end
 
 M.swap_mode_highlight = function(mode, active, scene_name)

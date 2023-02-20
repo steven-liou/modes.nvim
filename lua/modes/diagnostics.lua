@@ -11,7 +11,7 @@ local gitsigns_background_groups = {
 }
 
 M.define = function(config)
-	if not config.diagnostic_signs.enabled then
+	if not (config.diagnostic_signs and config.diagnostic_signs.enabled) then
 		return
 	end
 	color_opacity =
@@ -19,7 +19,7 @@ M.define = function(config)
 end
 
 M.highlight = function(config, scene_name)
-	if not config.diagnostic_signs.enabled then
+	if not (config.diagnostic_signs and config.diagnostic_signs.enabled) then
 		return
 	end
 

@@ -1,5 +1,5 @@
 local utils = require('modes.utils')
-local color_opacity = {}
+local colors_opacity = {}
 local M = {}
 
 local todos_types = {
@@ -13,10 +13,10 @@ local todos_types = {
 }
 
 M.define = function(config)
-	if not config.todos_comment.enabled then
+	if not (config.todos_comment and config.todos_comment.enabled) then
 		return
 	end
-	color_opacity =
+	colors_opacity =
 		utils.define_component_opacity(config, 'todos_comment', 'opacity')
 	if config.todos_comment.comment_types ~= nil then
 		todos_types = config.todos_comment.comment_types
@@ -24,7 +24,7 @@ M.define = function(config)
 end
 
 M.highlight = function(config, scene_name)
-	if not config.diagnostic_signs.enabled then
+	if not (config.todos_comment and config.todos_comment.enabled) then
 		return
 	end
 
@@ -38,7 +38,7 @@ M.highlight = function(config, scene_name)
 		if highlight_colors then
 			local fg_def = {
 				fg = highlight_colors.foreground,
-				bg = color_opacity[scene_name],
+				bg = colors_opacity[scene_name],
 				gui = 'bold',
 			}
 			utils.set_hl(sign_highlight, fg_def)

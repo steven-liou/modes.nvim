@@ -4,6 +4,10 @@ local lsp_kinds = require('modes.lsp_kinds')
 local M = {}
 
 M.define = function(config)
+	if not (config.lualine and config.lualine.enabled) then
+		return
+	end
+
 	statusbar_middle_colors = utils.define_component_opacity(
 		config,
 		'lualine',
@@ -13,8 +17,11 @@ end
 
 M.highlight = function(config, scene_event, scene_name)
 	if
-		not config.lualine.enabled
-		and type(config.lualine.aerial_component) ~= 'string'
+		not (
+			config.lualine
+			and config.lualine.enabled
+			and type(config.lualine.aerial_component) ~= 'string'
+		)
 	then
 		return
 	end

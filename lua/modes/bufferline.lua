@@ -1,5 +1,5 @@
 local utils = require('modes.utils')
-local color_opacity = {}
+local colors_opacity = {}
 local M = {}
 
 local bufferline_foreground_groups = {
@@ -14,10 +14,10 @@ local bufferline_foreground_groups = {
 }
 
 M.define = function(config)
-	if not config.bufferline.enabled then
+	if not (config.bufferline and config.bufferline.enabled) then
 		return
 	end
-	color_opacity =
+	colors_opacity =
 		utils.define_component_opacity(config, 'bufferline', 'opacity')
 end
 
@@ -33,13 +33,13 @@ local function set_devicon_component_highlight(scene_name)
 	if icon_color then
 		utils.set_hl(filetype_highlight_name, {
 			fg = icon_color.foreground,
-			bg = color_opacity[scene_name],
+			bg = colors_opacity[scene_name],
 		})
 	end
 end
 
 M.highlight = function(config, scene_name)
-	if not config.bufferline.enabled then
+	if not (config.bufferline and config.bufferline.enabled) then
 		return
 	end
 
@@ -50,7 +50,7 @@ M.highlight = function(config, scene_name)
 		if highlight_colors then
 			local fg_def = {
 				fg = colors[scene_name],
-				bg = color_opacity[scene_name],
+				bg = colors_opacity[scene_name],
 				gui = 'bold',
 			}
 			utils.set_hl(name, fg_def)

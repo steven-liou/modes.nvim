@@ -188,4 +188,43 @@ M.get_highlight_colors_by_name = function(name)
 	return hex_colors
 end
 
+M.highlight_background_groups = function(
+	scene_name,
+	highlight_groups_names,
+	colors_opacity
+)
+	for _, name in ipairs(highlight_groups_names) do
+		local highlight_colors = M.get_highlight_colors_by_name(name)
+		if highlight_colors then
+			local fg_def = {
+				fg = highlight_colors.foreground,
+				bg = colors_opacity[scene_name],
+				gui = 'bold',
+			}
+			M.set_hl(name, fg_def)
+		end
+	end
+end
+
+M.highlight_foreground_groups = function(
+	scene_name,
+	highlight_groups_names,
+	colors,
+	colors_opacity
+)
+	colors_opacity = colors_opacity or {}
+
+	for _, name in ipairs(highlight_groups_names) do
+		local highlight_colors = M.get_highlight_colors_by_name(name)
+		if highlight_colors then
+			local fg_def = {
+				fg = colors[scene_name],
+				bg = colors_opacity[scene_name],
+				gui = 'bold',
+			}
+			M.set_hl(name, fg_def)
+		end
+	end
+end
+
 return M
