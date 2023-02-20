@@ -37,35 +37,12 @@ M.highlight = function(config, scene_name)
 		colors_opacity
 	)
 
-	-- for _, name in ipairs(gitsigns_background_groups) do
-	-- 	local highlight_colors = utils.get_highlight_colors_by_name(name)
-	-- 	if highlight_colors then
-	-- 		local fg_def = {
-	-- 			fg = highlight_colors.foreground,
-	-- 			bg = color_opacity[scene_name],
-	-- 			gui = 'bold',
-	-- 		}
-	-- 		utils.set_hl(name, fg_def)
-	-- 	end
-	-- end
 	utils.highlight_foreground_groups(
 		scene_name,
 		gitsigns_foreground_groups,
 		colors,
 		colors_opacity
 	)
-
-	-- for _, name in ipairs(gitsigns_foreground_groups) do
-	-- 	local highlight_colors = utils.get_highlight_colors_by_name(name)
-	-- 	if highlight_colors then
-	-- 		local fg_def = {
-	-- 			fg = colors[scene_name],
-	-- 			bg = colors_opacity[scene_name],
-	-- 			gui = 'bold',
-	-- 		}
-	-- 		utils.set_hl(name, fg_def)
-	-- 	end
-	-- end
 end
 
 return M

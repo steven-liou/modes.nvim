@@ -45,17 +45,12 @@ M.highlight = function(config, scene_name)
 
 	local colors = config.colors
 
-	for _, name in ipairs(bufferline_foreground_groups) do
-		local highlight_colors = utils.get_highlight_colors_by_name(name)
-		if highlight_colors then
-			local fg_def = {
-				fg = colors[scene_name],
-				bg = colors_opacity[scene_name],
-				gui = 'bold',
-			}
-			utils.set_hl(name, fg_def)
-		end
-	end
+	utils.highlight_foreground_groups(
+		scene_name,
+		bufferline_foreground_groups,
+		colors,
+		colors_opacity
+	)
 
 	set_devicon_component_highlight(scene_name)
 

@@ -12,6 +12,8 @@ local todos_types = {
 	'WARN',
 }
 
+local todos_highlight_groups = {}
+
 M.define = function(config)
 	if not (config.todos_comment and config.todos_comment.enabled) then
 		return
@@ -21,6 +23,11 @@ M.define = function(config)
 	if config.todos_comment.comment_types ~= nil then
 		todos_types = config.todos_comment.comment_types
 	end
+
+	for _, type in ipairs(todos_types) do
+		local sign_highlight = ('TodoSign%s'):format(type)
+		table.insert(todos_highlight_groups, sign_highlight)
+	end
 end
 
 M.highlight = function(config, scene_name)
@@ -29,21 +36,12 @@ M.highlight = function(config, scene_name)
 	end
 
 	local colors = config.colors
-
-	for _, type in ipairs(todos_types) do
-		local sign_highlight = ('TodoSign%s'):format(type)
-		local highlight_colors =
-			utils.get_highlight_colors_by_name(sign_highlight)
-
-		if highlight_colors then
-			local fg_def = {
-				fg = highlight_colors.foreground,
-				bg = colors_opacity[scene_name],
-				gui = 'bold',
-			}
-			utils.set_hl(sign_highlight, fg_def)
-		end
-	end
+	utils.highlight_foreground_groups(
+		scene_name,
+		todos_highlight_groups,
+		colors,
+		colors_opacity
+	)
 end
 
 return M

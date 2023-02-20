@@ -1,5 +1,5 @@
 local utils = require('modes.utils')
-local color_opacity = {}
+local colors_opacity = {}
 local M = {}
 
 local gitsigns_background_groups = {
@@ -14,7 +14,7 @@ M.define = function(config)
 	if not (config.diagnostic_signs and config.diagnostic_signs.enabled) then
 		return
 	end
-	color_opacity =
+	colors_opacity =
 		utils.define_component_opacity(config, 'diagnostic_signs', 'opacity')
 end
 
@@ -23,19 +23,11 @@ M.highlight = function(config, scene_name)
 		return
 	end
 
-	local colors = config.colors
-
-	for _, name in ipairs(gitsigns_background_groups) do
-		local highlight_colors = utils.get_highlight_colors_by_name(name)
-		if highlight_colors then
-			local fg_def = {
-				fg = highlight_colors.foreground,
-				bg = color_opacity[scene_name],
-				gui = 'bold',
-			}
-			utils.set_hl(name, fg_def)
-		end
-	end
+	utils.highlight_background_groups(
+		scene_name,
+		gitsigns_background_groups,
+		colors_opacity
+	)
 end
 
 return M
