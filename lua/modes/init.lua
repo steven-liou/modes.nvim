@@ -6,6 +6,7 @@ local todos = require('modes.todos')
 local aerial = require('modes.aerial')
 local noice = require('modes.noice')
 local bufferline = require('modes.bufferline')
+local telescope = require('modes.telescope')
 local reset_delay = 500
 local reset_timer = nil
 local in_change_mode = false
@@ -140,6 +141,7 @@ M.highlight = function(scene_event)
 	gitsigns.highlight(config, scene_name)
 	todos.highlight(config, scene_name)
 	noice.highlight(config, scene_name)
+	telescope.highlight(config, scene_name)
 end
 
 M.swap_mode_highlight = function(mode, active, scene_name)
@@ -298,6 +300,7 @@ M.define = function()
 	end
 
 	lualine.define(config)
+	telescope.define(config)
 	gitsigns.define(config)
 	diagnostics.define(config)
 	todos.define(config)
@@ -491,17 +494,11 @@ M.setup = function(opts)
 	})
 
 	---Set insert highlight
-	vim.api.nvim_create_autocmd('InsertEnter', {
-		pattern = '*',
+	vim.api.nvim_create_autocmd('ModeChanged', {
+		pattern = '*:i',
 		callback = function()
 			M.highlight('insert')
 		end,
-	})
-
-	---Reset insert highlight
-	vim.api.nvim_create_autocmd('ModeChanged', {
-		pattern = 'i:n',
-		callback = M.reset,
 	})
 
 	---Set visual highlight

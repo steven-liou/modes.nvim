@@ -17,7 +17,7 @@ local gitsigns_foreground_groups = {
 }
 
 M.define = function(config)
-	if not config.gitsigns.enabled then
+	if not (config.gitsigns and config.gitsigns.enabled) then
 		return
 	end
 	colors_opacity =
