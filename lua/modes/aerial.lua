@@ -16,7 +16,6 @@ M.define = function(config)
 end
 
 M.highlight = function(config, scene_event, scene_name)
-	print(type(config.lualine.aerial_component))
 	if
 		not (
 			config.lualine
