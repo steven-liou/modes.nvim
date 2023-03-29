@@ -16,11 +16,12 @@ M.define = function(config)
 end
 
 M.highlight = function(config, scene_event, scene_name)
+	print(type(config.lualine.aerial_component))
 	if
 		not (
 			config.lualine
 			and config.lualine.enabled
-			and type(config.lualine.aerial_component) ~= 'string'
+			and type(config.lualine.aerial_component) == 'string'
 		)
 	then
 		return
@@ -45,9 +46,8 @@ M.highlight = function(config, scene_event, scene_name)
 		scene_event = 'normal'
 	end
 
-	-- "lualine_c_aerial_Key_insert"
 	for _, kind in ipairs(lsp_kinds) do
-		local aerial_kind_highlight_name = ('lualine_%s_aerial_%s_%s'):format(
+		local aerial_kind_highlight_name = ('lualine_%s_aerial_LLAerial%s_%s'):format(
 			config.lualine.aerial_component,
 			kind,
 			scene_event
@@ -64,7 +64,7 @@ M.highlight = function(config, scene_event, scene_name)
 			})
 		end
 
-		local aerial_kind_icon_highlight_name = ('lualine_%s_aerial_%sIcon_%s'):format(
+		local aerial_kind_icon_highlight_name = ('lualine_%s_aerial_LLAerial%sIcon_%s'):format(
 			config.lualine.aerial_component,
 			kind,
 			scene_event

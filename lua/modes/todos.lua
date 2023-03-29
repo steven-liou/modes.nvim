@@ -36,10 +36,9 @@ M.highlight = function(config, scene_name)
 	end
 
 	local colors = config.colors
-	utils.highlight_foreground_groups(
+	utils.highlight_background_groups(
 		scene_name,
 		todos_highlight_groups,
-		colors,
 		colors_opacity
 	)
 end

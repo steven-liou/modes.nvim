@@ -64,7 +64,6 @@ M.highlight = function(scene_event)
 	end
 
 	-- link cursor colors for operator and normal modes
-	local bg_def = { bg = colors[scene_name] }
 	if config.set_cursor then
 		if scene_event == 'normal' then
 			utils.set_hl('ModesNormalCursor', { link = 'ModesNormal' })
@@ -134,6 +133,7 @@ M.highlight = function(scene_event)
 	elseif scene_event == 'search' or scene_event == 'command_capslock' then
 		scene_event = 'command'
 	end
+
 	lualine.highlight(config, scene_event, scene_name)
 	aerial.highlight(config, scene_event, scene_name)
 	bufferline.highlight(config, scene_name)
