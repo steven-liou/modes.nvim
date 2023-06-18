@@ -6,6 +6,7 @@ local noice_background_groups = {}
 local noice_foreground_groups = {
 	'NoiceCmdlinePopupBorder',
 	'NoiceCmdlinePopupBorderSearch',
+	'NoiceCmdlinePopupTitle',
 	'NoiceCmdlinePopup',
 	'NoiceCmdlineIconCmdline',
 	'NoiceCmdlineIconSearch',
