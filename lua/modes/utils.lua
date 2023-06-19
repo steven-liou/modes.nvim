@@ -1,3 +1,5 @@
+local nvim_web_devicons = require('nvim-web-devicons')
+
 local M = {}
 
 ---Get normalised colour
@@ -225,6 +227,12 @@ M.highlight_foreground_groups = function(
 			M.set_hl(name, fg_def)
 		end
 	end
+end
+
+M.get_current_file_devicon_name = function()
+	local filename = vim.fn.expand('%:t')
+	local _, icon_name = nvim_web_devicons.get_icon(filename)
+	return icon_name
 end
 
 return M

@@ -25,12 +25,10 @@ local function set_filetype_component_highlight(
 	scene_event,
 	scene_name
 )
-	local ft = vim.bo.filetype
-
-	ft = utils.titlecase(ft)
-	local filetype_highlight_name = ('lualine_%s_filetype_DevIcon%s_%s'):format(
+	local icon_name = utils.get_current_file_devicon_name()
+	local filetype_highlight_name = ('lualine_%s_filetype_%s_%s'):format(
 		lualine.filetype_component,
-		ft,
+		icon_name,
 		scene_event
 	)
 	local icon_color =

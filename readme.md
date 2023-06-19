@@ -7,13 +7,15 @@ Highlight UI elements based on current mode. Inspired by the recent addition of 
 ## Usage
 
 ```lua
-use({
+-- Lazy package manager
+{
   'steven-liou/modes.nvim',
+  dependencies = {"nvim-tree/nvim-web-devicons"},
   config = function()
     vim.opt.cursorline = true
     require('modes').setup()
   end
-})
+}
 ```
 
 ![modes.nvim](https://user-images.githubusercontent.com/1474821/127896095-6da221cf-3327-4eed-82be-ce419bdf647c.gif)

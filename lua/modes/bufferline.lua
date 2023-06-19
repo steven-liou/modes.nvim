@@ -22,10 +22,8 @@ M.define = function(config)
 end
 
 local function set_devicon_component_highlight(scene_name)
-	local ft = vim.bo.filetype
-
-	ft = utils.titlecase(ft)
-	local filetype_highlight_name = ('BufferLineDevIcon%sSelected'):format(ft)
+	local icon_name = utils.get_current_file_devicon_name()
+	local filetype_highlight_name = ('BufferLine%sSelected'):format(icon_name)
 
 	local icon_color =
 		utils.get_highlight_colors_by_name(filetype_highlight_name)
