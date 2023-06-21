@@ -10,6 +10,7 @@ local bufferline_foreground_groups = {
 	'BufferLineCloseButtonSelected',
 	'BufferLinePickSelected',
 	'BufferLineIndicatorSelected',
+	'BufferLineDuplicateSelected',
 	'BufferLineModifiedSelected',
 }
 
