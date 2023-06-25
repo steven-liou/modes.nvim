@@ -125,10 +125,9 @@ M.highlight = function(scene_event)
 		or scene_event == 'char_replace'
 		or scene_event == 'undo'
 		or scene_event == 'redo'
-		or scene_event == 'change'
 	then
 		scene_event = 'normal'
-	elseif scene_event == 'insert_capslock' then
+	elseif scene_event == 'change' or scene_event == 'insert_capslock' then
 		scene_event = 'insert'
 	elseif scene_event == 'search' or scene_event == 'command_capslock' then
 		scene_event = 'command'
@@ -493,10 +492,30 @@ M.setup = function(opts)
 		callback = M.define,
 	})
 
+	---Reset highlight in normal mode when cursor moved
+	vim.api.nvim_create_autocmd('CursorMoved', {
+		callback = function()
+			local ok, current_mode = pcall(vim.fn.mode)
+			if
+				not ok
+				or current_mode ~= 'n'
+				or (operator_started and not in_change_mode)
+			then
+				return
+			end
+
+			M.highlight('normal')
+		end,
+	})
+
 	---Set insert highlight
 	vim.api.nvim_create_autocmd('ModeChanged', {
 		pattern = '*:i',
 		callback = function()
+			if in_change_mode then
+				return
+			end
+
 			M.highlight('insert')
 		end,
 	})
