@@ -424,6 +424,8 @@ M.setup = function(opts)
 			then
 				M.reset()
 				return
+			elseif operator_started then
+				return
 			end
 
 			if key == 'c' then
@@ -466,13 +468,13 @@ M.setup = function(opts)
 				operator_started = true
 				return
 			end
-			if key == '/' and not operator_started then
+			if key == '/' then
 				M.highlight('search')
 				operator_started = true
 				return
 			end
 
-			if key == '@' and not operator_started then
+			if key == '@' then
 				M.highlight('pending')
 				operator_started = true
 				return
